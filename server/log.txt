@@ -1,0 +1,1304 @@
+Error: Error: No key or keyFile set.
+Graphsystem server started on: 3000
+getByEmail q MATCH (a:Account) WHERE a.email = "admin@graphsystem.io" MATCH (a)-[:AUTHENTICATES]->(p:Profile) MATCH (p)<-[:PERSONALIZES]-(ps:Person) RETURN a.email, a.password, p.classId, p.actions, ID(p), ps.name
+getByEmail q MATCH (a:Account) WHERE a.email = "admin@graphsystem.io" MATCH (a)-[:AUTHENTICATES]->(p:Profile) MATCH (p)<-[:PERSONALIZES]-(ps:Person) RETURN a.email, a.password, p.classId, p.actions, ID(p), ps.name
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items: [],
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions: [ 'c_Class', 'r_Class', 'u_Class', 'd_Class' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15, items: [] }
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items: [],
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions: [ 'c_Class', 'r_Class', 'u_Class', 'd_Class' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15, items: [] }
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions: [ 'c_Class', 'r_Class', 'u_Class', 'd_Class' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"},{"name":"Objects","type":"folder","data":{"type":"objectList"},"icon":"uploads/6087a9f5e5b631b82662776b2187970c"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions: [ 'c_Class', 'r_Class', 'u_Class', 'd_Class' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions: [ 'c_Class', 'r_Class', 'u_Class', 'd_Class' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions: [ 'c_Class', 'r_Class', 'u_Class', 'd_Class' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions: [ 'c_Class', 'r_Class', 'u_Class', 'd_Class' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+
+■ ■ ■ [ classQuery.add ]  ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■
+
+■ data: { nodes:
+   { Profile:
+      { label: 'Profile',
+        name: 'Profile',
+        properties: [Object],
+        type: 'core',
+        showIf: '' } },
+  name: 'User',
+  edges:
+   { HAS:
+      { name: '',
+        label: 'HAS',
+        export: 'false',
+        filter: 'false',
+        required: 'true',
+        list: 'false',
+        multiple: 'false',
+        target: 'Profile',
+        source: [Object] } } }
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+
+■ ■ ■ [ classQuery.add ]  ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■ ■
+
+■ data: {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+[foldersController.find]
+req.query { pid: '12' }
+FQKVERI MATCH (p:Profile)-[:USES_FOLDERS]->(f:Folders) WHERE ID(p)=12 RETURN ID(f), f.items, ID(p), p.name, p.actions
+F DONE { id: 15,
+  items:
+   '[{"name":"Classes","type":"folder","data":{"type":"classList"},"icon":"uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a"}]',
+  profileId: 12,
+  profileName: 'Administrator',
+  profileActions:
+   [ 'c_Class',
+     'r_Class',
+     'u_Class',
+     'd_Class',
+     'c_16',
+     'r_16',
+     'u_16',
+     'd_16',
+     'c_17',
+     'r_17',
+     'u_17',
+     'd_17' ],
+  actions: 'rud' }
+onCompleted call success
+folders { id: 15,
+  items:
+   [ { name: 'Classes',
+       type: 'folder',
+       data: [Object],
+       icon: 'uploads/ff7c43a2f9fec3dfd1c7323bd71c5c8a' } ] }
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}
+------------------------------------------------
+[classController.find]
+req.query {}

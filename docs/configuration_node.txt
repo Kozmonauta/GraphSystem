@@ -1,0 +1,3 @@
+Configuration node properties:
+------------------------------
+primary inheritance label: HAS

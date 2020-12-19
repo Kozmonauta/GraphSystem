@@ -1,0 +1,22 @@
+{
+    "name":"Account",
+    "nodes":{
+        "account":{
+            "label":"Account",
+            "properties":{
+                "email":{
+                    "type":"string"
+                }
+            }
+        }
+    },
+    "edges":{
+        "object":{
+            "label":"AUTHENTICATES",
+            "from":"account",
+            "to":{
+                "class":"*"
+            }
+        }
+    }
+}

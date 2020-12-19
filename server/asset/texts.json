@@ -1,0 +1,18 @@
+{
+    "class": {
+        "create": {
+            "success": "Class created",
+            "error": "Class creation failed",
+            "error_non_existing_node": "Class creation failed ...probably reference to non existing node id",
+            "name_required": "Name is required",
+            "label_required": "Label is required",
+            "fields_required": "At least one field is required"
+        }
+    },
+    "system": {
+        "create": {
+            "success": "System created",
+            "error": "System creation failed"
+        }
+    }
+}

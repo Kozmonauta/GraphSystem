@@ -1,0 +1,9 @@
+Get a group with all children and attached profiles:
+
+MATCH (g:Group) WHERE g.name="Group 1.2" 
+MATCH (g)-[:HAS*]->(gc) 
+WITH DISTINCT [g,gc] AS gs 
+UNWIND gs AS gsu 
+OPTIONAL MATCH (p)-[:CONTROLS]->(gsu) 
+RETURN gsu,p;
+

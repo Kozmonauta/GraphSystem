@@ -1,0 +1,51 @@
+Ha két mindenható entitás van a rendszerben, akkor fenn állhat az eset, amikor A entitás B-nek a jogait korlátozza: B-nek ezentúl nincs jogosultsága X akcióhoz. Ugyan B továbbra is elveheti A jogát hogy az ő jogosultságait korlátozza, de B ekkkor már nem férhet hozzá A-nak X-szel való viszonyához.
+
+create attached node
+    parameters:
+        hostData
+            id
+            label
+            edgeLabel
+        clientData
+            id
+            label
+            edgeLabel
+            attachEdgeLabel
+            data
+    usage:
+        CALL dn.attachNode({id:"19",label:"Group",edgeLabel:"HAS"},{id:"29",label:"Profile",edgeLabel:"HAS",attachEdgeLabel:"CONTROLS",data:{name:"Alpha"}})
+    
+delete attached node
+    parameters:
+        hostData
+            label
+        clientData
+            id
+            label
+            edgeLabel
+            attachEdgeLabel
+    usage: 
+        CALL dn.deleteAttachedNode({label:"Group"},{id:"0",label:"Profile",edgeLabel:"HAS",attachEdgeLabel:"CONTROLS"})
+    
+collect inherit data
+    usage: 
+        RETURN dn.collectInheritData("31","Profile","HAS","in",null)
+        RETURN dn.collectInheritData("31","Profile","HAS","in","actions")
+    
+find primary nodes based on attached property (check permissions)
+    parameters:
+        hostData
+            id
+            label
+            edgeLabel
+        clientData
+            id
+            label
+            edgeLabel
+            attachEdgeLabel
+            propertyName
+            propertyValue
+    
+    usage:
+        RETURN dn.findNodesByAttachedProperty({id:"50",label:"Group",edgeLabel:"HAS"},{id:"70",label:"Profile",edgeLabel:"HAS",attachEdgeLabel:"CONTROLS",propertyName:"actions",propertyValue:"2"})
+    

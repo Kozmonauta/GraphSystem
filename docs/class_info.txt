@@ -1,0 +1,10 @@
+Node types:
+-----------
+Tree:
+    has one parent edge with primary inheritance edge label (HAS)
+    has multiple children edges with primary inheritance edge label (HAS)
+    
+Attached Tree:
+    has one parent edge with primary inheritance edge label (HAS)
+    has multiple children edges with primary inheritance edge label (HAS)
+    has one attach edge

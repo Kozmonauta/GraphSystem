@@ -1,0 +1,7 @@
+{
+    "nodes":{
+        "core":{
+            "$action":"delete"
+        }
+    }
+}

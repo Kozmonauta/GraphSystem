@@ -1,0 +1,24 @@
+1. layer: database
+
+    Stored procedures and functions:
+    - Create attached nodes
+    - Read ?
+    - Update ?
+    - Delete attached nodes
+    
+    - collect inherited data
+    
+    - find nodes by attached node data
+    
+2. layer: classes
+    - Handle classes
+    - Object handling based on classes
+    - Connecting objects based on classes
+
+3. layer: special values
+    - 
+    - allowSignup node property: allow users to sign up to a node
+        - 
+    - Allow 
+
+4. layer: 
