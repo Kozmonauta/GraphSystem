@@ -5,28 +5,24 @@ var objectQuery = require('../models/objectQuery');
 
 var objectModel = {
 
-    add: function(objectData, classData, success, error) {
-        logger.log('objectModel.add', {type: 'function'});
-        // console.log('objectData add c', classData);
-        // console.log('objectData add o', objectData);
+    create: async function(objectData) {
+        logger.log('objectModel.create', {type: 'function'});
         
-        var query = objectQuery.add(objectData, classData);
-
-        var neo4jSession = neo4jDriver.session();
-        neo4jSession
-            .run(query)
-            .subscribe({
-                onNext: function (data) {
-                    success(data);
-                },
-                onCompleted: function () {
-                    neo4jSession.close();
-                },
-                onError: function (err) {
-                    error(err);
-                }
-            })
-        ;
+        let result;
+        let neo4jSession = neo4jDriver.session();
+        const txc = neo4jSession.beginTransaction();
+        const query = objectQuery.create(objectData);
+        
+        try {
+            result = await txc.run(query);
+            await txc.commit();
+        } catch (error) {
+            result = error;
+            await txc.rollback();
+        } finally {
+            await neo4jSession.close();
+            return neo4jUtils.formatRecord(result.records[0], {singleRecord: true});
+        }
     },
     
     update: function(oldObjectData, objectData, classData, success, error) {

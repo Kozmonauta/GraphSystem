@@ -9,10 +9,22 @@
             "fields_required": "At least one field is required"
         }
     },
+    "object": {
+        "create": {
+            "success": "Object created",
+            "error": "Object creation failed"
+        }
+    },
     "system": {
         "create": {
             "success": "System created",
             "error": "System creation failed"
+        }
+    },
+    "core": {
+        "create": {
+            "success": "Core created",
+            "error": "Core creation failed"
         }
     }
 }

@@ -2,12 +2,11 @@
 
 var objectQuery = {
 
-    add: function(objectData, classData) {
-        logger.log('objectQuery.add', {type: 'function'});
+    create: function(objectData) {
+        logger.log('objectQuery.create', {type: 'function'});
         logger.log(objectData, {name: 'objectData'});
         // logger.log(classData, {name: 'classData'});
-        
-        var query = '';
+        // var query = 'CREATE (n:User)';
         var nodeFields = this.parseNodeFields(classData, objectData);
         
         for (var ok in objectData.connections) {

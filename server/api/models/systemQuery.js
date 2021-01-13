@@ -2,22 +2,66 @@
 
 var systemQuery = {
 
-    create: function(classes, objects) {
+    getCore: function() {
+        return 'MATCH (Core:Core) RETURN Core AS Core LIMIT 1;';
+    },
+    
+    createCore: function() {
+        return 'CREATE (Core:Core) RETURN Core AS Core;';
+    },
+    
+    getInheritClasses: function(core) {
+        return 'MATCH (c:Class)<-[:D]-(core:Core) WHERE ID(core)=' + core.ID + ' RETURN ID(c) AS ID, dn.collectInheritData(toString(ID(c)),"Class","E","out",null) AS Class;';
+        // return 'MATCH (c:Class)<-[:D]-(core:Core) RETURN dn.collectInheritData(toString(ID(c)),"Class","E","out",null) AS Class;';
+    },
+    
+    createClasses: function(classes, core) {
         var query = '';
         
-        query += 'CREATE (core:Core) ';
-        query += this.attachD('core', classes);
-        query += this.attachE(classes);
-        query += this.createObjects(classes, objects);
-        
-        query += 'RETURN core AS core,';
+        query += 'MATCH (core:Core) WHERE ID(core) = ' + core.ID + ' ';
         
         for (var ck in classes) {
-            query += ck + ' AS ' + ck + ',';
+            var c = classes[ck];
+            var classData = {
+                "labels": c.labels,
+                "name": c.name,
+                "abstract": c['abstract'],
+                "fields": c.fields,
+                "edges": c.edges
+            };
+            
+            var classDataString = '';
+            for (var pk in classData) {
+                classDataString += pk + ':' + utils.formatField(classData[pk]) + ',';
+            }
+            classDataString = classDataString.substring(0, classDataString.length - 1);
+            
+            query += 'CREATE (core)-[:D]->(' + ck + ':Class{' + classDataString + '}) ';
         }
-        for (var ok in objects) {
-            query += ok + ' AS ' + ok + ',';
+        
+        for (var ck in classes) {
+            var c = classes[ck];
+            if (c['extends'] === undefined) continue;
+            var es = Array.isArray(c['extends']) ? c['extends'] : [c['extends']];
+            
+            for (var ek in es) {
+                // $ means the class was defined in this same request, now other types are not handled
+                if (es[ek][0] !== '$') continue;
+                
+                var parentClass;
+                var pk = es[ek].substring(1);
+                if (classes[pk] !== undefined) {
+                    query += 'CREATE (' + ck + ')-[:E]->(' + pk + ') ';
+                }
+            }
         }
+        
+        query += 'RETURN ';
+        
+        for (var ck in classes) {
+            query += 'ID(' + ck + ') AS ' + ck + 'ID,';
+        }
+        
         query = query.substring(0, query.length - 1) + ';';
         
         return query;
@@ -26,78 +70,8 @@ var systemQuery = {
     createObjects: function(classes, objects) {
         var query = '';
         
-        for (var ok in objects) {
-            var o = objects[ok];
-            var c;
-            for (var ck in classes) {
-                if (o.classID === classes[ck].id) {
-                    c = classes[ck];
-                }
-            }
-            
-            var objectDataString;
-            query += 'CREATE (' + ok + ':' + c.label + '{' + objectDataString + '}') ';
-        }
-        
         return query;
     },
-    
-    attachD: function(key, classes) {
-        var query = '';
-
-        for (var ck in classes) {
-            var c = classes[ck];
-
-            var classData = {
-                "label": c.label,
-                "name": c.name,
-                "fields": c.fields,
-                "edges": c.edges
-            };
-            
-            if (c['abstract'] === true) {
-                classData['abstract'] = true;
-            }
-            
-            var classDataString = '';
-            for (var pk in classData) {
-                classDataString += pk + ':' + utils.formatField(classData[pk]) + ',';
-            }
-            classDataString = classDataString.substring(0, classDataString.length - 1);
-            
-            if (c['definer'] === ('$' + key)) {
-                if (c.createdInQuery === undefined) {
-                    query += 'CREATE (' + key + ')-[:D]->(' + ck + ':Class{' + classDataString + '}) ';
-                    c.createdInQuery = true;
-                } else {
-                    query += 'CREATE (' + key + ')-[:D]->(' + ck + ') ';
-                }
-            }
-        }
-        
-        return query;
-    },
-    
-    attachE: function(classes) {
-        var query = '';
-        
-        for (var ck in classes) {
-            var c = classes[ck];
-            if (c['extends'] !== undefined) {
-                if (typeof c['extends'] === 'string') {
-                    var classKey = c['extends'].substring(1);
-                    query += 'CREATE (' + ck + ')-[:E]->(' + classKey + ') ';
-                } else {
-                    for (var ek in c['extends']) {
-                        var classKey = c['extends'][ek].substring(1);
-                        query += 'CREATE (' + ck + ')-[:E]->(' + classKey + ') ';
-                    }
-                }
-            }
-        }
-        
-        return query;
-    }
     
 };
 

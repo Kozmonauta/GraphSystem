@@ -3,6 +3,12 @@
     - egy ember érzékeli az égzengést
 3. Történet leírása
 4. Sportesemémy dokumentálása
+5. Olyan rendszert keresek, ami az alabbiakat tudja:
+    ▪ Partnerek nyilvantartasa
+    ▪ Raktar / keszlet nyilvantartasa
+    ▪ Webaruhazzal szinkronizalhato: 
+    - automata szamlageneralas
+    - tobb arat kepes kezelni (gyakorlati pelda: vasarloi ar vs. viszonteladoi ar)
 --
 1. Híd építése
     create class {"name":"Project"}

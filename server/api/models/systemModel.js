@@ -1,28 +1,103 @@
 'use strict';
 
 var systemQuery = require('../models/systemQuery');
+var neo4jUtils = require('../neo4jUtils');
+var utils = require('../utils');
+var util = require('util');
 
 var systemModel = {
 
-    create: async function(classes, objects) {
-        logger.log('systemModel.create', {type: 'function'});
-
-        for (var cn in classes) {
-            classes[cn].definer = "$core";
-            
-            if (classes[cn].name === undefined) {
-                classes[cn].name = classes[cn].label;
-            }
-            if (classes[cn].fields !== undefined) {
-                classes[cn].fields = JSON.stringify(classes[cn].fields);
-            }
-            if (classes[cn].edges !== undefined) {
-                classes[cn].edges = JSON.stringify(classes[cn].edges);
-            }
-        }
+    hasCore: async function() {
+        logger.log('systemModel.hasCore', {type: 'function'});
+        let result;
+        let neo4jSession = neo4jDriver.session();
+        const txc = neo4jSession.beginTransaction();
+        const query = systemQuery.getCore();
         
-        var query = systemQuery.create(classes, objects);
-            console.log("query", query);
+        try {
+            result = await txc.run(query);
+            await txc.commit();
+        } catch (error) {
+            result = error;
+            await txc.rollback();
+        } finally {
+            await neo4jSession.close();
+            return result.records.length > 0;
+        }
+    },
+    
+    getInheritClasses: async function(core) {
+        logger.log('systemModel.getInheritClasses', {type: 'function'});
+        let result;
+        let neo4jSession = neo4jDriver.session();
+        const txc = neo4jSession.beginTransaction();
+        const query = systemQuery.getInheritClasses(core);
+        
+        try {
+            result = await txc.run(query);
+            await txc.commit();
+        } catch (error) {
+            result = error;
+            await txc.rollback();
+        } finally {
+            await neo4jSession.close();
+            // TODO this is a workaround because dn.collectInheritData does not return node ID - it should
+            var records = [];
+            var recordsFormatted = neo4jUtils.formatRecords(result.records);
+            for (var i=0;i<recordsFormatted.length;i++) {
+                var r = recordsFormatted[i]['Class'];
+                r.ID = recordsFormatted[i].ID;
+                records.push(r);
+            }
+            return records;
+        }
+    },
+    
+    createCore: async function() {
+        logger.log('systemModel.createCore', {type: 'function'});
+        let result;
+        let neo4jSession = neo4jDriver.session();
+        const txc = neo4jSession.beginTransaction();
+        const query = systemQuery.createCore();
+        
+        try {
+            result = await txc.run(query);
+            await txc.commit();
+        } catch (error) {
+            result = error;
+            await txc.rollback();
+        } finally {
+            await neo4jSession.close();
+            // console.log("Result: ", util.inspect(result, {showHidden: false, depth: null}));
+            return neo4jUtils.formatRecord(result.records[0], {singleRecord: true});
+        }
+    },
+    
+    createClasses: async function(classes, core) {
+        logger.log('systemModel.createClasses', {type: 'function'});
+        let result;
+        let neo4jSession = neo4jDriver.session();
+        const txc = neo4jSession.beginTransaction();
+        const query = systemQuery.createClasses(classes, core);
+        
+        try {
+            result = await txc.run(query);
+            await txc.commit();
+        } catch (error) {
+            await txc.rollback();
+            result = error;
+        } finally {
+            await neo4jSession.close();
+            // console.log("result: ", neo4jUtils.formatRecord(result.records[0]));
+            return neo4jUtils.formatRecord(result.records[0]);
+        }
+    },
+    
+    createObjects: async function(objects) {
+        logger.log('systemModel.createObjects', {type: 'function'});
+
+        var query = systemQuery.createObjects(objects);
+        console.log("query", query);
 
         let result;
         let neo4jSession = neo4jDriver.session();
@@ -30,15 +105,15 @@ var systemModel = {
         
         try {
             result = await txc.run(query);
-            console.log("system.create success");
             await txc.commit();
-            return result;
+            console.log("Database operation success");
         } catch (error) {
             await txc.rollback();
-            console.log("system.create error");
             result = error;
+            console.log("Database operation error");
         } finally {
             await neo4jSession.close();
+            console.log("Result: ", result);
             return result;
         }
     }

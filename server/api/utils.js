@@ -1,5 +1,16 @@
 var utils = {
 
+    returnError: function(res) {
+        res.status(400);
+        res.json({
+            "errors": [
+                {
+                    "message": texts.system.create.error
+                }
+            ]
+        });
+    },
+    
     isEmpty: function(v) {
         return v === undefined || v === null || v === '' || v.length === 0 || Object.keys(v).length === 0;
     },
@@ -85,53 +96,47 @@ var utils = {
         return s;
     },
     
-    // options:
-    //   fields: array of keys to include in the result; default: include all
-    //   keyLeftTrim: trim characters from the beginning of the item keys
-    getDbItem: function(data, options) {
-        if (options === undefined) options = {};
+    getDbItem: function(dbRecord) {
+        console.log('getDbItem', dbRecord);
+        var result;
         
-        var item = {};
-        
-        for (var i=0;i<data.keys.length;i++) {
-            // if (options.fields !== undefined && !options.fields.includes(data.keys[i])) continue;
+        if (dbRecord.keys.length === 1) {
+            var fieldKey = dbRecord.keys[i]
+            var fieldData = dbRecord._fields[dbRecord._fieldLookup[fieldKey]];
             
-            var field = data._fields[data._fieldLookup[data.keys[i]]];
-            var fieldKey = data.keys[i];
-            if (field !== undefined && field !== null) {
-                if (field.low !== undefined) {
-                    item[fieldKey] = parseInt(field.toString());
-                } else {
-                    item[fieldKey] = field;
-                }
-            // } else {
-                // item[fieldKey] = null;
+            // if object is Node
+            if (fieldData.identity !== undefined) {
+                result = this.formatDbNode(fieldData);
+            } else 
+            // if object is Integer
+            if (fieldData.low !== undefined) {
+                result = fieldData.low;
+            } else {
+                result = fieldData;
+            }
+        } else {
+            var result = [];
+            for (var i=0;i<dbRecord.keys.length;i++) {
+                var fieldKey = dbRecord.keys[i];
+                var fieldData = dbRecord._fields[dbRecord._fieldLookup[fieldKey]];
+                
+                items.push(this.formatDbNode(fieldData));
             }
         }
-
-        // Replace "ID()" to ".id" eg.: ID(n_Profile) => n_Profile.id
-        // for (var ik in item) {
-            // var ik2 = ik;
-            
-            // if (ik2.indexOf('ID(') === 0) {
-                // ik2 = ik2.slice(3, ik2.length - 1) + '.id';
-            // }
-            
-            // if (ik2.indexOf('n_') === 0 || ik2.indexOf('e_') === 0 ) {
-                // ik2 = ik2.slice(2, ik2.length);
-            // }
-            
-            // if (ik2.indexOf('_ep.') !== -1) {
-                // ik2 = ik2.replace('_ep.', '.');
-            // }
-            
-            // if (ik !== ik2) {
-                // item[ik2] = item[ik];
-                // delete item[ik];
-            // }
-        // }
+    },
+    
+    // Format neo4j node to gs node
+    formatDbNode: function(dbNode) {
+        console.log('formatDbNode', dbNode);
         
-        return item;
+        var node = {
+            "ID": dbNode.identity.low,
+            "labels": dbNode.labels,
+            "fields": dbNode.properties
+        };
+        
+        console.log('node', node);
+        return node;
     },
     
     // options:
@@ -290,7 +295,34 @@ var utils = {
                 break;
         }
         return r;
-    }    
+    },
+    
+    inheritData(oneData, allData) {
+        if (oneData['extends'] === undefined) {
+            return oneData;
+        } else 
+        if (Array.isArray(oneData['extends'])) {
+            for (ek=0;ek<oneData['extends'].length;ek++) {
+            }
+            return;
+        }
+        
+        var allDataKeys = Object.keys(allData);
+        var dataDone = [];
+        var parentKey = oneData['extends'];
+
+        for (ak in allData) {
+            var pak = '$' + ak;
+            if (pak === parentKey) {
+            }
+        }
+        
+        var ak = allDataKeys[0];
+        while (allData[ak]['extends'] !== undefined) {
+        }
+        
+        
+    }
     
 }
 
