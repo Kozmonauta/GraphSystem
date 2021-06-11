@@ -1,0 +1,157 @@
+{
+    "classes": {
+        "Root": {
+            "abstract": true,
+            "name": "Root",
+            "nodes": {
+                "core": {
+                    "labels": ["Root"]
+                }
+            },
+            "edges": {
+                "children": {
+                    "multiple": true,
+                    "source": "core"
+                }
+            }
+        },
+        "Leaf": {
+            "abstract": true,
+            "name": "Leaf",
+            "nodes": {
+                "core": {
+                    "labels": ["Leaf"]
+                }
+            },
+            "edges": {
+                "parent": {
+                    "target": "core"
+                }
+            }
+        },
+        "Pipe": {
+            "abstract": true,
+            "name": "Pipe",
+            "extends": "$Leaf",
+            "nodes": {
+                "core": {
+                    "labels": ["Pipe"]
+                }
+            },
+            "edges": {
+                "child": {
+                    "source": "core"
+                }
+            }
+        },
+        "Tree": {
+            "abstract": true,
+            "name": "Tree",
+            "extends": ["$Root", "$Leaf"],
+            "nodes": {
+                "core": {
+                    "labels": ["Tree"]
+                }
+            }
+        },
+        "Profile": {
+            "name": "Profile",
+            "extends": "$Tree",
+            "nodes": {
+                "core": {
+                    "labels": ["Profile"],
+                    "fields": {
+                        "actions": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "edges": {
+                "controls": {
+                    "type": "C",
+                    "source": "core",
+                    "required": true
+                },
+                "parent": {
+                    "type": "H"
+                },
+                "children": {
+                    "type": "H"
+                }
+            }
+        },
+        "User": {
+            "name": "User",
+            "extends": "$Profile",
+            "nodes": {
+                "core": {
+                    "core": true,
+                    "labels": ["User"],
+                    "fields": {
+                        "name": {
+                            "type": "string",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "edges": {
+                "authenticator": {
+                    "type": "A",
+                    "target": "core",
+                    "multiple": true,
+                    "required": true
+                }
+            }
+        },
+        "Account": {
+            "name": "Account",
+            "nodes": {
+                "core": {
+                    "labels": ["Account"],
+                    "fields": {
+                        "email": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "password": {
+                            "type": "string",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "edges": {
+                "authenticates": {
+                    "type": "A",
+                    "direction": "out",
+                    "multiple": true
+                }
+            }
+        },
+        "Client": {
+            "name": "Client",
+            "nodes": {
+                "core": {
+                    "labels": ["Client"],
+                    "fields": {
+                        "token": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "edges": {
+                "server": {
+                    "type": "S",
+                    "target": "core",
+                    "required": true
+                }
+            }
+        }
+    }
+}

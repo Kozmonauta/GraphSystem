@@ -4,37 +4,49 @@ var objectQuery = {
 
     create: function(objectData) {
         logger.log('objectQuery.create', {type: 'function'});
-        logger.log(objectData, {name: 'objectData'});
-        // logger.log(classData, {name: 'classData'});
-        // var query = 'CREATE (n:User)';
-        var nodeFields = this.parseNodeFields(classData, objectData);
+
+        // Steps:
+        // 1. Match all existing nodes.
+        //    Existing node is where endpoint.id != null
+        //    - endpoints, which will be connected to the object
+        //    - nodes, which will be updated and are part of the object
+        //    Todo: find a way to query them in a clever way, using paths
+        // 2. Match all existing edges. Existing edge is only possible between 2 existing nodes.
         
-        for (var ok in objectData.connections) {
-            // @TODO handle if c.multiple === true => error
-            var connected = classData.connections[ok].connected;
+        var nodeFields = utils.parseNodeFields(objectData);
+        console.log('nodeFields', nodeFields);
+        // var nodeFields = '{name:"Test"}';
+        var classData = objectData['class'];
+        var query = '';
+        
+        for (var ek in objectData.edges) {
+            var endpoint = objectData.edges[ek].endpoint;
             
-            if (connected !== undefined && connected.classLabel !== undefined) {
-                query += 'MATCH (n_' + ok + ':' + connected.classLabel + ') WHERE ID(n_' + ok + ') = ' + objectData.connections[ok] + ' ';
-            } else {
-                query += 'MATCH (n_' + ok + ') WHERE ID(n_' + ok + ') = ' + objectData.connections[ok] + ' ';
+            if (endpoint.id !== undefined) {
+                if (endpoint.classLabel !== undefined) {
+                    query += 'MATCH (n_' + ek + ':' + endpoint.classLabel + ') WHERE n_' + ek + '.id = "' + endpoint.id + '" ';
+                } else {
+                    query += 'MATCH (n_' + ek + ') WHERE n_' + ek + '.id = "' + endpoint.id + '" ';
+                }
             }
         }
         
-        query += 'CREATE (n:' + classData.label + nodeFields + ') ';
-
-        for (var ok in objectData.connections) {
-            var c = classData.connections[ok];
-            
-            query += 'CREATE (n)';
-            
-            if (c.direction === 'out') 
-                query += '-[e_' + ok + ':' + c.label + ']->(n_' + ok + ') ';
-            else if (c.direction === 'in') 
-                query += '<-[e_' + ok + ':' + c.label + ']-(n_' + ok + ') ';
-            ;
+        query += 'CREATE (n';
+        for (var i=0;i<classData.labels.length;i++) {
+            query += ':' + classData.labels[i];
         }
+        query += nodeFields + ') ';
 
-        query += 'RETURN true';
+        for (var ek in objectData.edges) {
+            var edgeClass = classData.edges[ek];
+            if (edgeClass.direction === 'out') {
+                query += 'CREATE (n)-[' + ek + ':'+ edgeClass.type +']->(n_' + ek + ') ';
+            } else {
+                query += 'CREATE (n)<-[' + ek + ':'+ edgeClass.type +']-(n_' + ek + ') ';
+            }
+        }
+        
+        query += 'RETURN n';
         
         logger.log(query, {name: 'query'});
 
@@ -574,47 +586,6 @@ console.log('c',c);
         // console.log('GCFEN query 2', query);
         
         return query;
-    },
-    
-    parseNodeFields: function(classData, objectData) {
-        // @TODO use classFields?
-        var s = '{';
-        var _oes = [];
-        var _ies = [];
-
-        for (var k in objectData.fields) {
-            if (!utils.isEmpty(objectData.fields[k])) {
-                s += '' + k + ':';
-                s += utils.formatField(objectData.fields[k]);
-                s += ',';
-            }
-        }
-        
-        // Add _oes, _ies
-        for (var k in classData.connections) {
-            var c = classData.connections[k];
-            
-            if (utils.isTrue(c.multiple)) {
-                var connected = c.label;
-                
-                if (c.connected !== undefined && c.connected.classId !== undefined) connected += ('.' + c.connected.classId);
-                if (c.direction === 'out') {
-                    _oes.push(connected);
-                } else 
-                if (c.direction === 'in') {
-                    _ies.push(connected);
-                }
-            }
-        }
-        
-        s += '_oes:' + utils.formatField(_oes) + ',';
-        s += '_ies:' + utils.formatField(_ies) + ',';
-        
-        if (s.length > 1) s = s.slice(0, -1);
-        
-        s += '}';
-        
-        return s;
     },
     
     delete: function(params) {

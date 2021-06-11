@@ -55,51 +55,8 @@ exports.checkFormat = function(res, o, c, options) {
     }
 };
 
-exports.add = function(o, c, res, options) {
-    if (options === undefined) options = {};
+exports.create = function(o, c, res, options) {
     
-    var coreId;
-    for (var nk in c.nodes) {
-        var nodeClass = c.nodes[nk];
-        if (nodeClass.type === 'core') {
-            coreId = o.nodes[nk].id;
-        }
-    }
-    
-    for (var nk in c.nodes) {
-        var nodeClass = c.nodes[nk];
-        
-        for (var pk in nodeClass.properties) {
-            var propertyClass = nodeClass.properties[pk];
-            
-            if (o.nodes[nk] === undefined) {
-                res = utils.addError({
-                    code: 'object_node_required',
-                    nodeKey: nk
-                }, res);
-            }
-            
-            var property = o.nodes[nk][pk];
-            if (propertyClass.required === true) {
-                if (propertyClass.textType !== 'password' || o.nodes[nk].id === options.pid) {
-                    if (utils.isEmpty(property)) {
-                        res = utils.addError({
-                            code: 'node_property_required',
-                            propertyKey: nk + '.' + pk
-                        }, res);
-                    }
-                }
-            }
-            
-            if (propertyClass.type === 'text' && propertyClass.textType === 'email') {
-                res = generalValidator.email(property, res);
-            }
-            
-            // @TODO handle property.rules
-        }
-    }
-    
-    if (res === undefined) res = { valid: true, items: [] };
     
     return res;
 };

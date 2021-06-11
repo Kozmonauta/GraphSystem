@@ -1,0 +1,4 @@
+Iterate object.edges (edge[ek])
+    if (edge[ek].ID) // reference to formerly persisted node
+        q += Match node as {ek}_node
+    

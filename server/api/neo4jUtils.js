@@ -11,7 +11,7 @@ var neo4jUtils = {
     formatRecord: function(record, options) {
         if (options === undefined) options = {};
         var res = {};
-// console.log('record', record);
+
         for (var i=0;i<record.keys.length;i++) {
             var fieldKey = record.keys[i];
             var fieldData = record._fields[record._fieldLookup[fieldKey]];
@@ -29,7 +29,6 @@ var neo4jUtils = {
                 res[fieldKey] = fieldData;
             }
         }
-// console.log('res', res);
         
         if (options.singleRecord === true) {
             res = res[record.keys[0]];

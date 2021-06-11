@@ -1,3 +1,5 @@
+var util = require('util');
+
 var utils = {
 
     returnError: function(res) {
@@ -9,6 +11,10 @@ var utils = {
                 }
             ]
         });
+    },
+    
+    showJSON: function(json) {
+        return util.inspect(json, {showHidden: false, depth: null});
     },
     
     isEmpty: function(v) {
@@ -93,6 +99,48 @@ var utils = {
             }
         }
 
+        return s;
+    },
+    
+    parseNodeFields: function(objectData) {
+        var s = '{';
+        // var _oes = [];
+        // var _ies = [];
+
+        s += 'id:apoc.create.uuid(),';
+
+        for (var k in objectData.fields) {
+            if (!this.isEmpty(objectData.fields[k])) {
+                s += '' + k + ':';
+                s += this.formatField(objectData.fields[k]);
+                s += ',';
+            }
+        }
+        
+        // Add _oes, _ies
+        // for (var k in classData.connections) {
+            // var c = classData.connections[k];
+            
+            // if (utils.isTrue(c.multiple)) {
+                // var connected = c.label;
+                
+                // if (c.connected !== undefined && c.connected.classId !== undefined) connected += ('.' + c.connected.classId);
+                // if (c.direction === 'out') {
+                    // _oes.push(connected);
+                // } else 
+                // if (c.direction === 'in') {
+                    // _ies.push(connected);
+                // }
+            // }
+        // }
+        
+        // s += '_oes:' + utils.formatField(_oes) + ',';
+        // s += '_ies:' + utils.formatField(_ies) + ',';
+        
+        if (s.length > 1) s = s.slice(0, -1);
+        
+        s += '}';
+        
         return s;
     },
     

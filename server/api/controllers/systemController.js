@@ -4,7 +4,7 @@ var systemModel = require('../models/systemModel');
 var objectModel = require('../models/objectModel');
 var classService = require('../services/classService');
 var objectService = require('../services/objectService');
-var util = require('util');
+var systemInit = require("../../config/system_init.json");
 
 // Creates the initial database
 // - core
@@ -13,142 +13,28 @@ var util = require('util');
 exports.create = function(req, res) {
     logger.log('systemController.create', {type: 'function'});
     
-    var classes = {
-        "Root": {
-            "abstract": true,
-            "labels": ["Root"],
-            "name": "Root",
-            "edges": {
-                "children": {
-                    "direction": "out",
-                    "multiple": true
-                }
-            }
-        },
-        "Leaf": {
-            "abstract": true,
-            "labels": ["Leaf"],
-            "name": "Leaf",
-            "edges": {
-                "parent": {
-                    "direction": "in"
-                }
-            }
-        },
-        "Pipe": {
-            "abstract": true,
-            "labels": ["Pipe"],
-            "extends": "$Leaf",
-            "name": "Pipe",
-            "edges": {
-                "child": {
-                    "direction": "out"
-                }
-            }
-        },
-        "Tree": {
-            "abstract": true,
-            "labels": ["Tree"],
-            "name": "Tree",
-            "extends": ["$Root", "$Leaf"]
-        },
-        "Profile": {
-            "labels": ["Profile"],
-            "extends": "$Tree",
-            "name": "Profile",
-            "fields": {
-                "actions": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"                
-                    }
-                }
-            },
-            "edges": {
-                "controls": {
-                    "type": "C",
-                    "direction": "out",
-                    "required": true
-                },
-                "parent": {
-                    "type": "H"
-                },
-                "children": {
-                    "type": "H"
-                }
-            }
-        },
-        "User": {
-            "labels": ["User"],
-            "extends": "$Profile",
-            "name": "User",
-            "fields": {
-                "name": {
-                    "type": "string",
-                    "required": true
-                }
-            },
-            "edges": {
-                "authenticator": {
-                    "type": "A",
-                    "direction": "in",
-                    "multiple": true,
-                    "required": true
-                }
-            }
-        },
-        "Account": {
-            "labels": ["Account"],
-            "name": "Account",
-            "fields": {
-                "email": {
-                    "type": "string",
-                    "required": true
-                },
-                "password": {
-                    "type": "string",
-                    "required": true
-                }
-            },
-            "edges": {
-                "authenticates": {
-                    "type": "A",
-                    "direction": "out",
-                    "multiple": true
-                }
-            }
-        },
-        "Client": {
-            "labels": ["Client"],
-            "name": "Client",
-            "fields": {
-                "token": {
-                    "type": "string"
-                }
-            },
-            "edges": {
-                "server": {
-                    "type": "S",
-                    "direction": "in",
-                    "required": true
-                }
-            }
-        }
-    };
-
+    var classes = systemInit.classes;
+    
     // stringify JSON fields
     for (var ck in classes) {
+        // if (classes[ck].nodes !== undefined) {
+            // classes[ck].nodes = JSON.stringify(classes[ck].nodes);
+        // }
         if (classes[ck].fields !== undefined) {
             classes[ck].fields = JSON.stringify(classes[ck].fields);
         }
         if (classes[ck].edges !== undefined) {
             classes[ck].edges = JSON.stringify(classes[ck].edges);
         }
+        if (classes[ck].actions !== undefined) {
+            classes[ck].actions = JSON.stringify(classes[ck].actions);
+        }
     }
-        
+
+    // Is system initialized?
     systemModel.hasCore()
         .then(hasCoreResult => {
-            if (hasCoreResult === true && false) {
+            if (hasCoreResult === true) {
                 res.status(400);
                 res.json({
                     "errors": [
@@ -161,67 +47,82 @@ exports.create = function(req, res) {
                 return;                
             }
             
+            // Create core
             systemModel.createCore()
                 .then(createCoreResult => {
+                    // Create basic classes
                     systemModel.createClasses(classes, createCoreResult)
                         .then(createClassesResult => {
+                            
                             for (var ck in classes) {
-                                classes[ck].ID = createClassesResult[ck + 'ID'];
+                                classes[ck].id = createClassesResult[ck + 'Id'];
                             }
-
+                            
+                            // Inherited class data is needed
                             systemModel.getInheritClasses(createCoreResult)
                                 .then(getClassesResult => {
+                                    var inheritedClasses = {};
+                                    
                                     for (var i=0;i<getClassesResult.length;i++) {
-                                        if (getClassesResult[i].ID === classes['User'].ID) {
-                                            classes['User'] = getClassesResult[i];
+                                        if (getClassesResult[i].id === String(classes['User'].id)) {
+                                            inheritedClasses['User'] = getClassesResult[i];
                                         }
-                                        if (getClassesResult[i].ID === classes['Account'].ID) {
-                                            classes['Account'] = getClassesResult[i];
+                                        if (getClassesResult[i].id === String(classes['Account'].id)) {
+                                            inheritedClasses['Account'] = getClassesResult[i];
                                         }
                                     }
                                     
                                     var coreAdministrator = {
-                                        "class": classes['User'],
+                                        // "class": inheritedClasses['User'],
+                                        "class": classes['User'].id,
                                         "fields": {
                                             "name": "Core Administrator",
                                             "actions": ["*"]
                                         },
                                         "edges": {
                                             "controls": {
-                                                "ID": createCoreResult.ID
-                                            },
-                                            "authenticator": {
-                                                "class": classes['Account'],
-                                                "fields": {
-                                                    "email": "admin@graphsystem.io",
-                                                    "password": "********"
-                                                },
-                                                "edges": {
-                                                    "authenticates": "$this.authenticator"
+                                                "endpoint": {
+                                                    "id": createCoreResult.id
+                                                }
+                                            }
+                                        },
+                                        "actions": {
+                                            "create.success": {
+                                                "account": {
+                                                    "action": "createObject",
+                                                    "parameters": {
+                                                        // "class": inheritedClasses['Account'],
+                                                        "class": classes['Account'].id,
+                                                        "fields": {
+                                                            "email": "admin@graphsystem.io",
+                                                            "password": "asdf"
+                                                        },
+                                                        "edges": {
+                                                            "authenticates": {
+                                                                "endpoint": "$parent"
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
                                     };
-                                    console.log("coreAdministrator: ", util.inspect(coreAdministrator, {showHidden: false, depth: null}));
+
+                                    // console.log("coreAdministrator: ", utils.showJSON(coreAdministrator));
                                     
-                                    objectModel.create(coreAdministrator)
-                                        .then(createObjectsResult => {
-                                            res.status(200);
-                                            res.json({
-                                                "message": texts.system.create.success
-                                            });
-                                        }, createObjectsResult => {
-                                            res.status(400);
-                                            res.json({
-                                                "errors": [
-                                                    {
-                                                        "message": texts.system.create.error
-                                                    }
-                                                ]
-                                            });
-                                        })
-                                    ;
+                                    var msg = {
+                                        'action': 'createObject',
+                                        'parameters': coreAdministrator
+                                    };
+                                    var msgString = JSON.stringify(msg);
+                                    MQService.send('actions', msgString);
+
+                                    res.status(200);
+                                    res.json({
+                                        "message": "Created"
+                                    });
                                 }, getClassesResult => {
+                                    console.log('e1');
                                     res.status(400);
                                     res.json({
                                         "errors": [
@@ -233,6 +134,7 @@ exports.create = function(req, res) {
                                 })
                             ;
                         }, createClassesResult => {
+                                    console.log('e2');
                             res.status(400);
                             res.json({
                                 "errors": [
@@ -244,6 +146,7 @@ exports.create = function(req, res) {
                         })
                     ;
                 }, createCoreResult => {
+                                    console.log('e3');
                     res.status(400);
                     res.json({
                         "errors": [
@@ -255,6 +158,7 @@ exports.create = function(req, res) {
                 })
             ;
         }, hasCoreResult => {
+                                    console.log('e4');
             res.status(400);
             res.json({
                 "errors": [
@@ -263,6 +167,22 @@ exports.create = function(req, res) {
                     }
                 ]
             });            
+        })
+    ;
+};
+
+exports.clear = function(req, res) {
+    systemModel.clear()
+        .then(r => {
+            res.status(200);
+            res.json({
+                "message": "Database erased"
+            });
+        }, res => {
+            res.status(400);
+            res.json({
+                "message": "Error: Database couldn't be erased"
+            });
         })
     ;
 };

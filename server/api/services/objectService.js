@@ -1,42 +1,60 @@
-'use strict';
-
+var classModel = require('../models/classModel');
 var objectModel = require('../models/objectModel');
-var async = require('async');
+var util = require('util');
 
-exports.mergeClass = function(objectData, classData) {
-    if (classData.events !== undefined) {
-        if (objectData.events === undefined) {
-            objectData.events = [];
-        }
-        objectData.events = classData.events.concat(objectData.events);
-    }
+var objectService = {
     
-    if (classData.edges !== undefined) {
-        if (objectData.edges === undefined) {
-            objectData.edges = {};
+    create: async function(o) {
+        logger.log('objectService.create', {type: 'function'});
+        // console.log('object', o);
+        
+        if (typeof o['class'] === 'string') {
+            o['class'] = await classModel.get(o['class']);
         }
-        for (var ek in classData.edges) {
-            if (objectData[ek] !== undefined) {
+        // console.log('class', o['class'].name);
+        
+        var now = new Date().getTime();
+        o.fields._classId = o['class'].id;
+        o.fields._createdOn = new Date().getTime();
+        o.fields._creator = ".";
+        
+        await objectModel.create(o)
+            .then(res => {
+                var actions = o.actions;
+                if (actions !== undefined) {
+                    var createSuccessActions = actions['create.success'];
+                    if (createSuccessActions !== undefined) {
+                        for (var k in createSuccessActions) {
+                            var action = createSuccessActions[k];
+                            console.log('triggered action:', action);
+                            if (action.action === 'createObject') {
+                                var actionParameters = action.parameters;
+                                if (actionParameters.edges !== undefined) {
+                                    for (ek in actionParameters.edges) {
+                                        var e = actionParameters.edges[ek];
+                                        if (e.endpoint === '$parent') {
+                                            e.endpoint = {
+                                                "id": res.fields.id
+                                            }
+                                        }
+                                    }
+                                }
+                                var msg = action;
+                                var msgString = JSON.stringify(msg);
+                                MQService.send('actions', msgString);
+                            }
+                        }
+                    }
+                }
                 
-                objectData[ek] = classData.edges[ek];
-            }
-        }
+                return res;
+            }, err => {
+                console.log('err', err);
+                return err;
+            })
+        ;
     }
-    return objectData;
-};
-
-// neo4j db format --> api format
-exports.decodeObject = function(dbItem) {
-    console.log('dbItem', dbItem);
-    var objectData = {
-        // TODO handle 64 bit int
-        id: dbItem.identity.low,
-        label: dbItem.properties.label,
-        name: dbItem.properties.name,
-        edges: dbItem.properties.edges,
-        fields: dbItem.properties.fields
-    };
     
-    return classData;
 };
 
+module.exports = objectService;

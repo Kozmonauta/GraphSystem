@@ -8,4 +8,8 @@ module.exports = function(app) {
         .post(controller.create)
     ;
 
+    app.route('/system/clear')
+        .post(controller.clear)
+    ;
+
 };

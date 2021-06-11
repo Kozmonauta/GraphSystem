@@ -6,14 +6,15 @@ var express = require('express'),
 utils = require("./api/utils");
 appConfig = require("./config/dev.json");
 texts = require("./asset/texts.json");
+logger = require("./api/services/logService");
+
+MQService = require("./api/services/MQService");
+MQService.consume('actions');
 
 const neo4j = require('neo4j-driver')
 neo4jDriver = neo4j.driver(appConfig.neo4j.url, neo4j.auth.basic(appConfig.neo4j.user, appConfig.neo4j.password), {
     maxTransactionRetryTime: 30000
 })
-
-// neo4jDriver = neo4j.driver(appConfig.neo4j.url, neo4j.auth.basic(appConfig.neo4j.user, appConfig.neo4j.password));
-logger = require("./api/services/logService");
 
 app.listen(port);
 

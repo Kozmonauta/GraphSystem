@@ -1,6 +1,7 @@
 'use strict';
 
 var classQuery = require('../models/classQuery');
+var neo4jUtils = require('../neo4jUtils');
 
 var classModel = {
 
@@ -82,50 +83,29 @@ var classModel = {
         ;
     },
 
-    get: function(filter, options, success, error) {
+    get: async function(filter, options) {
         logger.log('classModel.get', {type: 'function'});
-        
-        var query = classQuery.get(filter, options);
-        var neo4jSession = neo4jDriver.session();
-        
-        neo4jSession
-            .run(query)
-            .subscribe({
-                onNext: function (data) {
-                    // console.log('GETTTTTTO data:', data);
-                    var item = utils.getDbItem(data, {keyLeftTrim:2});
-                    // console.log('item:', item);
-                    
-                    if (item.edges !== undefined) item.edges = JSON.parse(item.edges);
-                    if (item.fields !== undefined) item.fields = JSON.parse(item.fields);
-                    if (item.form !== undefined) item.form = JSON.parse(item.form);
-                    if (item.filter !== undefined) item.filter = JSON.parse(item.filter);
-                    if (item.list !== undefined) item.list = JSON.parse(item.list);
-                    
-                    if (item.containerId !== undefined) {
-                        item.container = {
-                            id: item.containerId,
-                            name: item.containerName
-                        };
-                    }
-                    
-                    delete item.containerId;
-                    delete item.containerName;
-                    
-                    item._actions = 'rud';
-                    success(item);
-                },
-                onCompleted: function () {
-                    neo4jSession.close();
-                },
-                onError: function (err) {
-                    console.log('error', err);
-                    error(err);
-                }
-            })
-        ;
-    },
+        let result;
+        let neo4jSession = neo4jDriver.session();
+        const txc = neo4jSession.beginTransaction();
 
+        if (options === undefined) options = {mode:'inherited'};
+        if (typeof filter === 'string') filter = {id:filter};
+        
+        const query = classQuery.get(filter, options);
+        
+        try {
+            result = await txc.run(query);
+            await txc.commit();
+        } catch (error) {
+            result = error;
+            await txc.rollback();
+        } finally {
+            await neo4jSession.close();
+            return neo4jUtils.formatRecord(result.records[0], {singleRecord: true});
+        }
+    },
+    
     findByIds: function(ids, success, error) {
         logger.log('classModel.findByIds', {type: 'function'});
 

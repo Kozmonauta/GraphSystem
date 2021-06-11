@@ -1,0 +1,4 @@
+1. Create object User "Albert"
+    connected to Group "A" <-- User class edge
+    triggers Account "Albert" creation <-- User class action, triggered on create event
+2. Create object Account

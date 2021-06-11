@@ -2,6 +2,7 @@
 
 var classQuery = require('../models/classQuery');
 var objectQuery = require('../models/objectQuery');
+var neo4jUtils = require('../neo4jUtils');
 
 var objectModel = {
 

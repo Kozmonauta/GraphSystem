@@ -1,5 +1,14 @@
 tutorial
     https://www.codementor.io/olatundegaruba/nodejs-restful-apis-in-10-minutes-q0sgsfhbd
     
-run server
-    cmd: npm run start
+run nodeJS server
+    cd {project folder}
+    npm run start
+    
+run neo4j:
+    cd {neo4j folder}/bin
+    neo4j console
+    
+run rabbitMQ:
+    cd {rabbitMQ folder}/sbin
+    rabbitmq-server.bat

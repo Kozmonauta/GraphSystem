@@ -1,0 +1,56 @@
+- Graphsystem class structure
+    
+    HashMap<String, Field> fields
+    HashMap<String, Node> nodes
+    HashMap<String, Action> actions
+
+- Graphsystem built in classes
+
+    class Field
+        String type
+        String enum
+
+    class Action
+        Edge target
+        String type
+        HashMap<String, ?> parameters
+
+    class Event
+        Long timestamp
+        List<Action> actions
+
+    class ActionSet
+        HashMap<String, ?> actions
+        HashMap<String, ?> nodes
+
+    class EventSet
+        List<Event> events
+        List<Node> nodes
+
+    class Node extends ActionSet
+        HashMap<String, Object> fields
+
+- Graphsystem class examples
+    
+    class Account
+        fields: {
+            email: { type: "email" },
+            password: { type: "password" }
+        }
+        
+    class Person
+        fields: {
+            name: { type: "text" }
+            sex: { type: "text", enum: ["male", "female"] }
+        },
+        actions: {
+            created: [{
+                type:  "createObject",
+                target: "Account",
+                
+                
+           }] 
+       },
+       nodes: {}
+
+- Graphsystem objects

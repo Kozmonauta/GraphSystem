@@ -1,4 +1,7 @@
+--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+
 POST /object
+
 request body:
 {
     "classID": "2ff4d122-e89b-12d3-a456-426614174000",
@@ -24,7 +27,38 @@ request body:
     }
 }
 
+--==--== OR --==--==
+
+{
+    "classID": "8ff4d122-e89b-12d3-a456-426614174000",
+    "fields": {
+        "name": "Bridge Construction Project",
+        "number": "BCP-1"
+    },
+    "edges": {
+        "parent": {
+            "ID": "723e4567-e89b-12d3-a456-426614174000",
+            "label": "Core"
+        },
+        "contracts": [{
+            "classID": "68ea747e-e89b-12d3-a456-426614174000",
+            "document": {
+                "content": "files/start_contract.pdf",
+            },
+            "edges": {
+                "partners": [{
+                    "ID": "18ea747e-189b-12d3-a456-426614174000",
+                    "label": "Company"
+                }]
+            }
+        }]
+    }
+}
+
+--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+
 GET /object/3ff4d122-e89b-12d3-a456-426614174000
+
 response body:
 {
     "ID": "3ff4d122-e89b-12d3-a456-426614174000",
@@ -43,7 +77,10 @@ response body:
     }
 }
 
+--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
+
 GET /object/3ff4d122-e89b-12d3-a456-426614174000?includeClass=true&extended=false
+
 response body:
 {
     "ID": "3ff4d122-e89b-12d3-a456-426614174000",
@@ -64,3 +101,5 @@ response body:
         "actions": ["c_Project", "r_Project", "u_Project", "d_Project"]
     }
 }
+
+--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==

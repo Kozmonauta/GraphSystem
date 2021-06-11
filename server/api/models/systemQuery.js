@@ -7,27 +7,28 @@ var systemQuery = {
     },
     
     createCore: function() {
-        return 'CREATE (Core:Core) RETURN Core AS Core;';
+        return 'CREATE (Core:Core{id:apoc.create.uuid()}) RETURN Core.id AS id;';
     },
     
     getInheritClasses: function(core) {
-        return 'MATCH (c:Class)<-[:D]-(core:Core) WHERE ID(core)=' + core.ID + ' RETURN ID(c) AS ID, dn.collectInheritData(toString(ID(c)),"Class","E","out",null) AS Class;';
-        // return 'MATCH (c:Class)<-[:D]-(core:Core) RETURN dn.collectInheritData(toString(ID(c)),"Class","E","out",null) AS Class;';
+        return 'MATCH (c:Class)<-[:D]-(core:Core) WHERE core.id="' + core.id + '" RETURN dn.collectInheritData(c.id,"Class","E","out",null) AS Class;';
     },
     
     createClasses: function(classes, core) {
         var query = '';
         
-        query += 'MATCH (core:Core) WHERE ID(core) = ' + core.ID + ' ';
+        query += 'MATCH (core:Core) WHERE core.id = "' + core.id + '" ';
         
         for (var ck in classes) {
             var c = classes[ck];
             var classData = {
-                "labels": c.labels,
                 "name": c.name,
                 "abstract": c['abstract'],
+                "labels": c.labels,
+                "edges": c.edges,
+                // "nodes": c.nodes,
                 "fields": c.fields,
-                "edges": c.edges
+                "actions": c.actions
             };
             
             var classDataString = '';
@@ -36,9 +37,10 @@ var systemQuery = {
             }
             classDataString = classDataString.substring(0, classDataString.length - 1);
             
-            query += 'CREATE (core)-[:D]->(' + ck + ':Class{' + classDataString + '}) ';
+            query += 'CREATE (core)-[:D]->(' + ck + ':Class{id:apoc.create.uuid(),' + classDataString + '}) ';
         }
         
+        // Handle "extends" in the same request
         for (var ck in classes) {
             var c = classes[ck];
             if (c['extends'] === undefined) continue;
@@ -57,12 +59,12 @@ var systemQuery = {
         }
         
         query += 'RETURN ';
-        
         for (var ck in classes) {
-            query += 'ID(' + ck + ') AS ' + ck + 'ID,';
+            query += ck + '.id AS ' + ck + 'Id,';
         }
         
         query = query.substring(0, query.length - 1) + ';';
+        // console.log(query);
         
         return query;
     },
@@ -72,6 +74,13 @@ var systemQuery = {
         
         return query;
     },
+    
+    // Erases database
+    clear: function() {
+        var query = 'MATCH (n) WITH n LIMIT 10000 DETACH DELETE n RETURN count(*);';
+        
+        return query;
+    }
     
 };
 

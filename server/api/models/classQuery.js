@@ -214,34 +214,13 @@ var classQuery = {
         switch (options.mode) {
             // Just the node
             case 'simple':
-                query += 'MATCH (n:Class) WHERE ID(n)=' + filter.id + ' ';
-                query += 'OPTIONAL MATCH (n)<-[:DEFINES]-(c) ';
-                query += 'RETURN ID(n) AS id';
-                query += ', n.name AS name';
-                query += ', n.label AS label';
-                query += ', n.fields AS fields';
-                query += ', n.edges AS edges';
-                query += ', n.list AS list';
-                query += ', n.form AS form';
-                query += ', n.filter AS filter';
-                query += ', ID(c) AS containerId';
-                query += ', c.name AS containerName';
+                query += 'MATCH (n:Class) WHERE n.id="' + filter.id + '" ';
+                query += 'RETURN n AS c';
                 break;
             // Node with inherited values
             case 'inherited':
-                // @TODO update to v2
-                query += 'MATCH (n:Class) WHERE ID(n)=' + filter.id + ' ';
-                query += 'OPTIONAL MATCH (n)<-[:DEFINES]-(c) ';
-                query += 'RETURN ID(n) AS id';
-                query += ', n.name AS name';
-                query += ', n.label AS label';
-                query += ', n.fields AS fields';
-                query += ', n.edges AS edges';
-                query += ', n.list AS list';
-                query += ', n.form AS form';
-                query += ', n.filter AS filter';
-                query += ', ID(c) AS containerId';
-                query += ', c.name AS containerName';
+                query += 'MATCH (n:Class) WHERE n.id="' + filter.id + '" ';
+                query += 'RETURN dn.collectInheritData(n.id,"Class","E","out",null) AS c';
                 break;
         }
         console.log('query', query);

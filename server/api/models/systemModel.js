@@ -2,8 +2,6 @@
 
 var systemQuery = require('../models/systemQuery');
 var neo4jUtils = require('../neo4jUtils');
-var utils = require('../utils');
-var util = require('util');
 
 var systemModel = {
 
@@ -41,15 +39,7 @@ var systemModel = {
             await txc.rollback();
         } finally {
             await neo4jSession.close();
-            // TODO this is a workaround because dn.collectInheritData does not return node ID - it should
-            var records = [];
-            var recordsFormatted = neo4jUtils.formatRecords(result.records);
-            for (var i=0;i<recordsFormatted.length;i++) {
-                var r = recordsFormatted[i]['Class'];
-                r.ID = recordsFormatted[i].ID;
-                records.push(r);
-            }
-            return records;
+            return neo4jUtils.formatRecords(result.records, {singleRecord: true});
         }
     },
     
@@ -59,7 +49,7 @@ var systemModel = {
         let neo4jSession = neo4jDriver.session();
         const txc = neo4jSession.beginTransaction();
         const query = systemQuery.createCore();
-        
+
         try {
             result = await txc.run(query);
             await txc.commit();
@@ -68,8 +58,9 @@ var systemModel = {
             await txc.rollback();
         } finally {
             await neo4jSession.close();
+            let core = {id: neo4jUtils.formatRecord(result.records[0], {singleRecord: true})};
             // console.log("Result: ", util.inspect(result, {showHidden: false, depth: null}));
-            return neo4jUtils.formatRecord(result.records[0], {singleRecord: true});
+            return core;
         }
     },
     
@@ -79,7 +70,7 @@ var systemModel = {
         let neo4jSession = neo4jDriver.session();
         const txc = neo4jSession.beginTransaction();
         const query = systemQuery.createClasses(classes, core);
-        
+
         try {
             result = await txc.run(query);
             await txc.commit();
@@ -88,7 +79,6 @@ var systemModel = {
             result = error;
         } finally {
             await neo4jSession.close();
-            // console.log("result: ", neo4jUtils.formatRecord(result.records[0]));
             return neo4jUtils.formatRecord(result.records[0]);
         }
     },
@@ -114,6 +104,30 @@ var systemModel = {
         } finally {
             await neo4jSession.close();
             console.log("Result: ", result);
+            return result;
+        }
+    },
+    
+    clear: async function() {
+        logger.log('systemModel.clear', {type: 'function'});
+
+        var query = systemQuery.clear();
+        // console.log("query", query);
+
+        let result;
+        let neo4jSession = neo4jDriver.session();
+        const txc = neo4jSession.beginTransaction();
+        
+        try {
+            result = await txc.run(query);
+            await txc.commit();
+            // console.log("Database operation success");
+        } catch (error) {
+            await txc.rollback();
+            result = error;
+            console.log("Database operation error");
+        } finally {
+            await neo4jSession.close();
             return result;
         }
     }

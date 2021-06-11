@@ -11,7 +11,7 @@ module.exports = function(app) {
 
     app.route('/objects')
         .get(controller.findByQuery)
-        .post(controller.add)
+        .post(controller.create)
     ;
 
     app.route('/objects/:id')

@@ -1,0 +1,139 @@
+swagger: "2.0"
+info:
+  description: "Az EDL Keretrendszernek a Jegyzet modul kiszolgálásához szükséges REST végpontjai"
+  version: "1.0.0"
+  title: "Keretrendszer-Jegyzet integráció"
+basePath: "/v1"
+schemes:
+- "https"
+- "http"
+paths:
+  /users:
+    get:
+      description: "Felhasználók listája event alapján"
+      operationId: "findUsersByEventID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "eventID"
+        in: "query"
+        description: "Azok a user-ek listázódnak, akik kapcsolódnak az eseményhez"
+        required: true
+        type: "string"
+      - name: "groups"
+        in: "query"
+        description: "Kapcsolt group legyen/ne legyen"
+        type: "string"
+        enum:
+        - "all"
+        - "nogroups"
+        - "onlygroups"
+        default: "all"
+      - name: "sort"
+        in: "query"
+        description: "Rendezés"
+        type: "string"
+        enum:
+        - "+name"
+        - "-name"        
+        default: "+name"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                  description: "User ID"
+                name:
+                  type: "string"
+                  description: "User neve"
+                status:
+                  type: "string"
+                  description: "User státusz"
+                role:
+                  type: "string"
+                  enum:
+                  - "student"
+                  - "teacher"
+                  - "admin"                  
+                groupID:
+                  type: "string"
+                  description: "Ha a felhasználó group-on (osztály) keresztül van egy eseményhez rendelve, akkor itt a group ID-ja szerepel"
+                groupName:
+                  type: "string"
+                  description: "Group neve - groupID-hoz hasonlóan"
+        "400":
+          description: "Invalid"
+  /events:
+    get:
+      description: "Események listája user alapján"
+      operationId: "findEventsByUserID"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "userID"
+        in: "query"
+        description: "Azok az események listázódnak, amiket a user láthat"
+        required: true
+        type: "string"
+      - name: "type"
+        in: "query"
+        description: "Szűrés event.type-ra, pl. tanóra"
+        type: "string"
+        enum:
+        - "lesson"
+        - "exam"
+        - "...?"
+      - name: "closed"
+        in: "query"
+        description: "Ha closed == true akkor csak lezárt események listázódnak"
+        type: "boolean"
+      - name: "sort"
+        in: "query"
+        description: "Rendezés"
+        type: "string"
+        enum:
+        - "+date"
+        - "-date"
+        default: "+date"
+      - name: "userRole"
+        in: "query"
+        description: "Azok az események listázódnak, ahol a user az adott szerepkörben van"
+        type: "string"
+        enum:
+        - "student"
+        - "teacher"
+        - "admin"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                  description: "Event ID"
+                name:
+                  type: "string"
+                  description: "Event type"
+                date:
+                  type: "string"
+                  format: "date-time"
+                  description: "Event date"
+                subjectID:
+                  type: "string"
+                  description: "Event-hez tartozó subject ID"
+                subjectName:
+                  type: "string"
+                  description: "Event-hez tartozó subject name"
+                userRole:
+                  type: "string"
+                  description: "User szerepköre az event-ben"
+        "400":
+          description: "Invalid"

@@ -10,12 +10,14 @@ var emailService = require('../services/emailService');
 var fs = require('fs');
 const uuidv1 = require('uuid/v1');
 
-exports.add = function(req, res) {
-    console.log('[--- objectController.add ---]');
+exports.create = function(req, res) {
+    logger.log('objectController.create', {type: 'function'});
     // console.log('req.body', req.body);
     
     var pid = req.headers.pid;
     var objectData = req.body;
+    
+    
     var classId = objectData.classId;
     var validationResult = { items: [], valid: true };
     objectValidator.hasClass(validationResult, objectData);
