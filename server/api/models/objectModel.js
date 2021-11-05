@@ -6,23 +6,111 @@ var neo4jUtils = require('../neo4jUtils');
 
 var objectModel = {
 
-    create: async function(objectData) {
+    // Collect the nodes and their required available edge fields so they can be connected to the actual object
+    getNodesToCheck: function(objectData, classData) {
+        let nodesToCheck = {};
+        let i = 0;
+        
+        for (let ek in objectData.edges) {
+            i++;
+            let direction;
+            let nodeToCheckID;
+
+            if (objectData.edges[ek].target !== undefined) {
+                direction = 'in';
+                nodeToCheckID = objectData.edges[ek].target;
+            } else {
+                direction = 'out';
+                nodeToCheckID = objectData.edges[ek].source;
+            }
+            
+            let type = classData.edges[ek].type;
+            
+            if (nodesToCheck[i] === undefined) {
+                nodesToCheck[i] = {
+                    nodeID: nodeToCheckID,
+                    edges: []
+                };
+            }
+            
+            nodesToCheck[i].edges.push({
+                type: type,
+                direction: direction
+            });
+        }
+        // console.log('nodesToCheck', utils.showJSON(nodesToCheck));
+
+        return nodesToCheck;
+    },
+    
+    // 
+    getNodesToUpdate: function(nodesToCheck, checkedNodes) {
+        let nodesToUpdate = {};
+        
+        for (let ek in checkedNodes) {
+            if (checkedNodes[ek] > 0) {
+                let aera = ek.split('.');
+                let nodeIndex = aera[0].substring(1);
+                let fieldName = aera[1];
+                if (nodesToUpdate[nodeIndex] === undefined) {
+                    nodesToUpdate[nodeIndex] = {
+                        nodeID: nodesToCheck[nodeIndex].nodeID,
+                        edges: []
+                    };
+                }
+                nodesToUpdate[nodeIndex].edges.push(fieldName);
+            }
+        }
+        // console.log('nodesToUpdate', nodesToUpdate);
+         
+        return nodesToUpdate;
+    },
+    
+    create: async function(objectData, classData) {
         logger.log('objectModel.create', {type: 'function'});
         
-        let result;
-        let neo4jSession = neo4jDriver.session();
+        const nodesToCheck = this.getNodesToCheck(objectData, classData);
+        const caeQuery = objectQuery.checkAvailableEdges(nodesToCheck);
+        const createQuery = objectQuery.create(objectData, classData);
+        const neo4jSession = neo4jDriver.session();
         const txc = neo4jSession.beginTransaction();
-        const query = objectQuery.create(objectData);
-        
+
         try {
-            result = await txc.run(query);
+            // Check the available edges of the connected nodes
+            const caeResultRaw = await txc.run(caeQuery);
+            // TODO handle all wrong cases
+            if (caeResultRaw.records.length === 0) {
+                throw new Error('Wrong connections');
+            }
+            
+            const caeResult = neo4jUtils.formatRecord(caeResultRaw.records[0]);
+            
+            for (let fk in caeResult) {
+                if (caeResult[fk] === null || caeResult[fk] === 0) {
+                    throw new Error('No available connections');
+                }
+            }
+            
+            const nodesToUpdate = this.getNodesToUpdate(nodesToCheck, caeResult);
+            
+            // Update the available edges of the connected nodes
+            if (Object.keys(nodesToUpdate).length > 0) {
+                const uaeQuery = objectQuery.updateAvailableEdges(nodesToUpdate);
+                const uaeResult = await txc.run(uaeQuery);
+            }
+            
+            const createResult = await txc.run(createQuery);
+            const result = neo4jUtils.formatRecord(createResult.records[0], {singleRecord: true});
+            console.log('txc return', result);
+            
             await txc.commit();
-        } catch (error) {
-            result = error;
+            
+            return result;
+        } catch (e) {
             await txc.rollback();
+            throw e;
         } finally {
             await neo4jSession.close();
-            return neo4jUtils.formatRecord(result.records[0], {singleRecord: true});
         }
     },
     

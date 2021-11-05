@@ -7,7 +7,7 @@ var systemQuery = {
     },
     
     createCore: function() {
-        return 'CREATE (Core:Core{id:apoc.create.uuid()}) RETURN Core.id AS id;';
+        return 'CREATE (Core:Core{id:apoc.create.uuid(), _oe_H:-1, _ie_C:-1}) RETURN Core.id AS id;';
     },
     
     getInheritClasses: function(core) {
@@ -26,9 +26,7 @@ var systemQuery = {
                 "abstract": c['abstract'],
                 "labels": c.labels,
                 "edges": c.edges,
-                // "nodes": c.nodes,
-                "fields": c.fields,
-                "actions": c.actions
+                "nodes": c.nodes
             };
             
             var classDataString = '';

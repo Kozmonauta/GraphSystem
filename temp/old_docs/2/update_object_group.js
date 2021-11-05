@@ -1,0 +1,21 @@
+{
+    "nodes":{
+        "core":{
+            "id":2,
+            "name":"Team 2"
+        },
+        "address":{
+            "country":"sk"
+        },
+        "settings":{
+            "$action":"delete"
+        }
+    },
+    "edges":{
+        "container":{
+            "source":{
+                "id":10
+            }
+        }
+    }
+}

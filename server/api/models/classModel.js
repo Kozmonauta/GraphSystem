@@ -24,7 +24,7 @@ var classModel = {
             result = error;
         } finally {
             await neo4jSession.close();
-            return result;
+            return neo4jUtils.formatRecord(result.records[0], {singleRecord: true});
         }
     },
     
@@ -85,24 +85,30 @@ var classModel = {
 
     get: async function(filter, options) {
         logger.log('classModel.get', {type: 'function'});
-        let result;
-        let neo4jSession = neo4jDriver.session();
+        
+        const neo4jSession = neo4jDriver.session();
         const txc = neo4jSession.beginTransaction();
 
-        if (options === undefined) options = {mode:'inherited'};
-        if (typeof filter === 'string') filter = {id:filter};
+        if (options === undefined) options = {mode: 'inherited'};
+        if (typeof filter === 'string') filter = {id: filter};
         
         const query = classQuery.get(filter, options);
         
         try {
-            result = await txc.run(query);
+            const resultRaw = await txc.run(query);
+            
+            if (resultRaw.records.length === 0) {
+                throw new Error('Class not found');
+            }
+            
+            const result = neo4jUtils.formatRecord(resultRaw.records[0], {singleRecord: true});
             await txc.commit();
-        } catch (error) {
-            result = error;
+            return result;
+        } catch (e) {
             await txc.rollback();
+            throw e;
         } finally {
             await neo4jSession.close();
-            return neo4jUtils.formatRecord(result.records[0], {singleRecord: true});
         }
     },
     

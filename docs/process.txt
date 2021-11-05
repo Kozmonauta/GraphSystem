@@ -2,3 +2,51 @@
     connected to Group "A" <-- User class edge
     triggers Account "Albert" creation <-- User class action, triggered on create event
 2. Create object Account
+
+
+
+--
+UI
+
+Use Cases
+
+1. Log in -> user is active
+
+
+
+2. "Create class" button is shown when user has "create class" permission for any object
+
+2.1. User can see and can select multiple items from the list of classes. Classes with "read class" permission for user are listed only
+
+2.2. Select one or more classes -> Build the class form based on the selected classes (inherited)
+
+2.2.1. The class form shows and marks the inherited properties
+
+2.2.1.1. When hovering the mark icon, the origin of the property is shown: all the property variations of the parent classes are listed
+
+2.3. Store the class
+
+2.3.1. -- Example of the form's output: docs/class_examples.js/"POST /class"
+
+2.3.2. Check user's "create class" permission for the connected object (definer)
+
+2.3.3. Check user's "view class" permission for the directly extended classes (extends)
+
+2.3.4. The class is stored in db, connected to "extends" nodes (-[E]->) and the definer node (<-[D]-)
+
+
+
+3. "Create object" button is seen when user has create permission for any class
+
+3.1. User can see and can select from classes, where user has create permission
+
+3.2. Select a class -> Build the object form based on the selected class (inherited)
+
+3.3. Store the object
+
+3.3.1. -- Example of the form's output: docs/object_examples.js/"POST /object"
+
+3.3.2. Check user's create permission for the class (objectService)
+
+3.3.3. Check user's permission for the connected nodes (edges)
+

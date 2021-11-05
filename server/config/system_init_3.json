@@ -1,0 +1,177 @@
+{
+    "classes": {
+        "Root": {
+            "abstract": true,
+            "labels": ["Root"],
+            "name": "Root",
+            "edges": {
+                "children": {
+                    "direction": "out",
+                    "multiple": true
+                }
+            }
+        },
+        "Leaf": {
+            "abstract": true,
+            "labels": ["Leaf"],
+            "name": "Leaf",
+            "edges": {
+                "parent": {
+                    "direction": "in",
+                    "required": true
+                }
+            }
+        },
+        "Pipe": {
+            "abstract": true,
+            "labels": ["Pipe"],
+            "extends": "$Leaf",
+            "name": "Pipe",
+            "edges": {
+                "child": {
+                    "direction": "out"
+                }
+            }
+        },
+        "Tree": {
+            "abstract": true,
+            "labels": ["Tree"],
+            "name": "Tree",
+            "extends": ["$Root", "$Leaf"]
+        },
+        "Controller": {
+            "abstract": true,
+            "labels": ["Controller"],
+            "name": "Controller",
+            "extends": ["$Tree"],
+            "fields": {
+                "actions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "edges": {
+                "controls": {
+                    "direction": "out",
+                    "required": true
+                }
+            }
+        },
+        "Profile": {
+            "labels": ["Profile"],
+            "extends": "$Controller",
+            "name": "Profile",
+            "edges": {
+                "controls": {
+                    "type": "C"
+                },
+                "parent": {
+                    "type": "H"
+                },
+                "children": {
+                    "type": "H"
+                }
+            }
+        },
+        "User": {
+            "labels": ["User"],
+            "extends": "$Profile",
+            "name": "User",
+            "fields": {
+                "name": {
+                    "type": "string",
+                    "required": true
+                }
+            },
+            "edges": {
+                "authenticator": {
+                    "type": "A",
+                    "direction": "in",
+                    "multiple": true,
+                    "required": true
+                }
+            },
+            "actions": {
+                "create.success": {
+                    "account": {
+                        "action": "createObject",
+                        "parameters": {
+                            "class": "Account"
+                        }
+                    }
+                }
+            }
+        },
+        "Settings": {
+            "labels": ["Settings"],
+            "extends": "$Tree",
+            "name": "Settings",
+            "fields": {
+                "language": {
+                    "type": "string"
+                }
+            },
+            "edges": {
+                "parent": {
+                    "type": "H"
+                },
+                "children": {
+                    "type": "H"
+                },
+                "test": {
+                    "type": "TESTS",
+                    "direction": "out"
+                }
+            },
+            "actions": {
+                "create.success": {
+                    "account": {
+                        "action": "createObject",
+                        "parameters": {
+                            "class": "$this"
+                        }
+                    }
+                }
+            }
+        },
+        "Account": {
+            "labels": ["Account"],
+            "name": "Account",
+            "fields": {
+                "email": {
+                    "type": "string",
+                    "required": true
+                },
+                "password": {
+                    "type": "string",
+                    "required": true
+                }
+            },
+            "edges": {
+                "authenticates": {
+                    "type": "A",
+                    "direction": "out",
+                    "multiple": true
+                }
+            }
+        },
+        "Client": {
+            "labels": ["Client"],
+            "name": "Client",
+            "fields": {
+                "token": {
+                    "type": "string"
+                }
+            },
+            "edges": {
+                "server": {
+                    "type": "S",
+                    "direction": "in",
+                    "required": true
+                }
+            }
+        }
+    }
+}

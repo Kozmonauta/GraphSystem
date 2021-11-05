@@ -2,54 +2,194 @@
 
 var objectQuery = {
 
-    create: function(objectData) {
-        logger.log('objectQuery.create', {type: 'function'});
-
-        // Steps:
-        // 1. Match all existing nodes.
-        //    Existing node is where endpoint.id != null
-        //    - endpoints, which will be connected to the object
-        //    - nodes, which will be updated and are part of the object
-        //    Todo: find a way to query them in a clever way, using paths
-        // 2. Match all existing edges. Existing edge is only possible between 2 existing nodes.
+    createEdgesForNodes: function(nodes, edges, o, c) {
+        let query = '';
+        let newNodes = [];
+        let newEdges = [];
         
-        var nodeFields = utils.parseNodeFields(objectData);
-        console.log('nodeFields', nodeFields);
-        // var nodeFields = '{name:"Test"}';
-        var classData = objectData['class'];
-        var query = '';
-        
-        for (var ek in objectData.edges) {
-            var endpoint = objectData.edges[ek].endpoint;
+        for (let i=0; i<nodes.length; i++) {
+            const nk = nodes[i];
             
-            if (endpoint.id !== undefined) {
-                if (endpoint.classLabel !== undefined) {
-                    query += 'MATCH (n_' + ek + ':' + endpoint.classLabel + ') WHERE n_' + ek + '.id = "' + endpoint.id + '" ';
-                } else {
-                    query += 'MATCH (n_' + ek + ') WHERE n_' + ek + '.id = "' + endpoint.id + '" ';
+            for (let ek in edges) {
+                let e = edges[ek];
+                
+                if (e.target === nk || e.source === nk) {
+                    let nnk;
+                    
+                    if (e.target === nk) {
+                        nnk = e.source;
+                    } else 
+                    if (e.source === nk) {
+                        nnk = e.target;
+                    }
+
+                    if (nnk !== undefined) {
+                        let objectFieldsString = '';
+                        for (let fk in o.nodes[nnk]) {
+                            objectFieldsString += fk + ':' + utils.formatField(o.nodes[nnk][fk]) + ',';
+                        }
+                        objectFieldsString = objectFieldsString.substring(0, objectFieldsString.length - 1);
+
+                        if (!newNodes.includes(nnk)) {
+                            query += 'CREATE (' + nnk + ':' + c.nodes[nnk].label;
+                            query += '{id:apoc.create.uuid(),' + objectFieldsString + '})';
+                            
+                            newNodes.push(nnk);
+                        } else {
+                            query += 'CREATE (' + nnk + ')';
+                        }
+                        
+                        if (e.target === nk) {
+                            query += '-[:' + e.type + ']->(' + nk + ') ';
+                        } else 
+                        if (e.source === nk) {
+                            query += '<-[:' + e.type + ']-(' + nk + ') ';
+                        }
+                    }
+                    
+                    newEdges.push(ek);
                 }
             }
         }
         
-        query += 'CREATE (n';
-        for (var i=0;i<classData.labels.length;i++) {
-            query += ':' + classData.labels[i];
+        return {
+            query: query,
+            nodes: newNodes,
+            edges: newEdges
         }
-        query += nodeFields + ') ';
+    },
+    
+    isNodeAliased: function(id, nodes) {
+        for (let nk in nodes) {
+            if (id === nodes[nk]) return true;
+        }
+        return false;
+    },
+    
+    create: function(o, c) {
+        logger.log('objectQuery.create', {type: 'function'});
+        
+        let query = '';
 
-        for (var ek in objectData.edges) {
-            var edgeClass = classData.edges[ek];
-            if (edgeClass.direction === 'out') {
-                query += 'CREATE (n)-[' + ek + ':'+ edgeClass.type +']->(n_' + ek + ') ';
-            } else {
-                query += 'CREATE (n)<-[' + ek + ':'+ edgeClass.type +']-(n_' + ek + ') ';
+        // Match external nodes
+        let externalNodes = {};
+        let eni = 0;
+        let nodeAlias;
+
+        for (let ek in o.edges) {
+            let e = o.edges[ek];
+            
+            // if edge.target is an external node
+            if (e.target !== undefined) {
+                if (!this.isNodeAliased(e.target, externalNodes)) {
+                    nodeAlias = 'en_' + (++eni);
+                    externalNodes[nodeAlias] = e.target;
+                    query += 'MATCH (' + nodeAlias + ') WHERE ' + nodeAlias + '.id="' + e.target + '" ';
+                }
+                e.target = nodeAlias;
+            } else 
+            // if edge.source is an external node
+            if (e.source !== undefined) { 
+                if (!this.isNodeAliased(e.source, externalNodes)) {
+                    nodeAlias = 'en_' + (++eni);
+                    externalNodes[nodeAlias] = e.source;
+                    query += 'MATCH (' + nodeAlias + ') WHERE ' + nodeAlias + '.id="' + e.source + '" ';
+                }
+                e.source = nodeAlias;
             }
         }
         
-        query += 'RETURN n';
+        let nodes = [];
+        for (let nk in externalNodes) {
+            nodes.push(nk);
+        }
         
-        logger.log(query, {name: 'query'});
+        let edges = utils.mergeObjects(o.edges, c.edges);
+        
+        console.log('o', utils.showJSON(o));
+        console.log('c', utils.showJSON(c));
+        console.log('edges', utils.showJSON(edges));
+        
+        while (Object.keys(edges).length > 0) {
+            let cefnResult = this.createEdgesForNodes(nodes, edges, o, c);
+            nodes = cefnResult.nodes;
+            for (let i=0; i<cefnResult.edges.length; i++) {
+                delete edges[cefnResult.edges[i]];
+            }
+            query += cefnResult.query;
+        }
+        
+        query += 'RETURN true;';
+        
+        console.log('query', query);
 
+        return query;
+    },
+    
+    checkAvailableEdges: function(nodes) {
+        logger.log('objectQuery.checkAvailableEdges', {type: 'function'});
+
+        var query = '';
+        
+        for (var nk in nodes) {
+            if (nodes[nk].label !== undefined) {
+                query += 'MATCH (n' + nk + ':' + nodes[nk].label + ') ';
+            } else {
+                query += 'MATCH (n' + nk + ') ';
+            }
+            query += 'WHERE n' + nk + '.id="' + nodes[nk].nodeID + '" '
+        }
+        
+        query += 'RETURN ';
+        
+        for (var nk in nodes) {
+            var node = nodes[nk];
+            for (var i=0; i<node.edges.length; i++) {
+                query += 'n' + nk + '.';
+                
+                if (node.edges[i].direction === 'out') {
+                    query += '_oe_';
+                } else {
+                    query += '_ie_';
+                }
+                query += node.edges[i].type + ',';
+            }
+        }
+        query = query.substring(0, query.length - 1);
+        
+        // console.log('query', query);
+        return query;
+    },
+    
+    updateAvailableEdges: function(nodes) {
+        logger.log('objectQuery.updateAvailableEdges', {type: 'function'});
+
+        var query = '';
+        console.log('nodes', utils.showJSON(nodes));
+        for (var nk in nodes) {
+            if (nodes[nk].label !== undefined) {
+                query += 'MATCH (n' + nk + ':' + nodes[nk].label + ') ';
+            } else {
+                query += 'MATCH (n' + nk + ') ';
+            }
+            query += 'WHERE n' + nk + '.id="' + nodes[nk].nodeID + '" '
+        }
+        
+        query += 'SET ';
+        
+        for (var nk in nodes) {
+            var node = nodes[nk];
+            for (var i=0; i<node.edges.length; i++) {
+                var fieldName = 'n' + nk + '.' + node.edges[i];
+                query += fieldName + '=' + fieldName + '-1,';
+            }
+        }
+        
+        query = query.substring(0, query.length - 1);
+        
+        query += ' RETURN true;';
+        
+        // console.log('query', query);
         return query;
     },
     

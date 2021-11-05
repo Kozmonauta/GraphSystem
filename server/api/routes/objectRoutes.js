@@ -5,9 +5,9 @@ module.exports = function(app) {
     var controller = require('../controllers/objectController');
 
     // Async/await test
-    app.route('/await')
-        .get(controller.awaitTest)
-    ;
+    // app.route('/await')
+        // .get(controller.awaitTest)
+    // ;
 
     app.route('/objects')
         .get(controller.findByQuery)

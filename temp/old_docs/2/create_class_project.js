@@ -1,0 +1,34 @@
+{
+    "label":"Project",
+    "extends":{
+        "id":1
+    },
+    "nodes":{
+        "core":{
+            "label":"Project",
+            "properties":{
+                "type":{
+                    "type":"String",
+                    "enum":"enum:Core.AlphaCompany.ReportTypes"
+                }
+            }
+        },
+        "files":{
+            "class":"Core.FileContainer"
+        }
+    },
+    "edges":{
+        "files":{
+            "source":"core",
+            "target":"files",
+            "label":"HAS"
+        },
+        "address":{
+            "label":"LOCATED",
+            "source":"core",
+            "target":{
+                "class":"Core.Address"
+            }
+        }
+    }
+}

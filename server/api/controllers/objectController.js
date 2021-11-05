@@ -7,163 +7,48 @@ var eventService = require('../services/eventService');
 var objectService = require('../services/objectService');
 var classService = require('../services/classService');
 var emailService = require('../services/emailService');
+var errorHandler = require('../errorHandler');
 var fs = require('fs');
 const uuidv1 = require('uuid/v1');
 
 exports.create = function(req, res) {
     logger.log('objectController.create', {type: 'function'});
-    // console.log('req.body', req.body);
     
-    var pid = req.headers.pid;
-    var objectData = req.body;
+    const pid = req.headers.pid;
+    const o = req.body;
+    const crcResult = objectValidator.createRequestCheck(o);
     
-    
-    var classId = objectData.classId;
-    var validationResult = { items: [], valid: true };
-    objectValidator.hasClass(validationResult, objectData);
-    
-    if (validationResult.valid === false) {
+    if (!errorHandler.isValid(crcResult)) {
         res.status(400);
-        res.json(validationResult);
+        res.json(crcResult);
+        return;
     }
     
-    classModel.get({id: classId}, {'mode':'inherited'}, 
-        function(classData) {
-            objectValidator.checkRequired(validationResult, objectData, classData);
-
-            if (validationResult.valid === false) {
-                res.status(400);
-                res.json(validationResult);
-                return;
-            }
-            
-            objectData.fields._classId = classData.id;
-            var now = new Date().getTime();
-            objectData.fields._createdOn = new Date().getTime();
-            objectData.fields._creator = pid;
-            
-            // objectData = utils.mergeObjects(objectData, classService.collectEdgeConnections(classData));
-
-            var token;
-            var isUser = false;
-            // @TODO ...
-            for (var fk in classData.fields) {
-                if (classData.fields[fk].textType === 'password') {
-                    isUser = true;
-                }
-            }
-            
-            if (isUser === true) {
-                // @TODO validate emails
-                // validationResult = objectValidator.account(objectData, classData, validationResult, {pid: pid});
-                
-                // if (validationResult.valid === false) {
-                    // res.status(400);
-                    // res.json(validationResult);
-                    // return;
-                // }
-                
-                var actions = objectData.fields.actions;
-                var objects = [];
-                var folderItems = [];
-                
-                for (var i=0;i<actions.length;i++) {
-                    var ps = actions[i].split('_');
-                    if (ps[1] !== 'Class' && !objects.includes(ps[1])) {
-                        objects.push(ps[1]);
-                    }
-                }
-                
-                for (var i=0;i<objects.length;i++) {
-                    var folderItem = {
-                        name: 'Új mappa',
-                        type: 'folder',
-                        data: {
-                            type: 'objectList',
-                            filter: {
-                                classId: objects[i]
-                            }
-                        }
-                    };
-                    
-                    folderItems.push(folderItem);
-                }
-                
-                token = uuidv1();
-                objectData.fields.folders = JSON.stringify(folderItems);
-                objectData.fields._activationToken = token;
-            }
-    // console.log('objectData', objectData);
-            
-            objectModel.add(objectData, classData, 
-                function(rData) {
-                    var successItem = {
-                        code: 'object_added'
-                    };
-                    
-                    if (token !== undefined) {
-                        var profileName = objectData.fields.name;
-                        var activateUrl = appConfig.userActivateUrl.replace('{token}', token);
-                        
-                        var email = objectData.fields.email;
-                        var subject = 'Meghívó az online jelölő rendszerbe';
-                        var message = '';
-                        message += 'Kedves ' + profileName + '!<br/><br/>';
-                        message += 'Meghívjuk a online jelölő rendszer használatára, melynek segítségével munkája során történő eseményeket tudja egyszerűen kezelni.<br/><br/>';
-                        
-                        message += 'A használatbavételhez kérem kattinston a következő linkre!<br/><br/>';
-                        message += '<a href="' + activateUrl + '">' + activateUrl + '</a><br/><br/>';
-                        message += 'Üdvözlettel,<br/>';
-                        message += 'Teszt vezető';
-                    
-                        console.log('email prepare', message);
-                        //// For testing: in case of *.aa email, we don't send the email
-                        var emailSplit = email.split('.');
-                        if (emailSplit[emailSplit.length - 1] !== 'aa') {
-                            console.log('email sent');
-                            emailService.send(email, undefined, subject, message);
-                        }
-                    }
-                    
-                    var operationResult = utils.addSuccess(successItem, validationResult);
-                    
-                    // if (rData.events !== undefined) {
-                        // for (var i=0;i<objectData.events.length;i++) {
-                            // var e = objectData.events[i];
-                            // if (e.trigger === 'createObject') {
-                                // var g = true;
-                                // if (e.condition !== undefined) {
-                                    // g = eventService.applyLogic(e.condition);
-                                // }
-                                // if (g === true) {
-                                    // e.action = eventService.replaceParameters(e.action);
-                                    // eventService.perform(e.action);
-                                // }
-                            // }
-                        // }
-                    // }
-                    
-                    // emailService.send('');
-                    // emailService.send('');
-
-                    console.log('operationResult', operationResult);
-                    console.log('ret 1');
-                    res.status(200);
-                    res.json(operationResult);
-                },
-                function(rErr) {
-                    console.log('ret 2');
-                    res.status(400);
-                    res.json(utils.addError({code: 'database_error'}));        
-                }
-            );
-        },
-        function(rErr) {
-                    console.log('ret 3');
-            res.status(400);
-            res.json(utils.addError({code: 'database_error'}));        
+    classModel.get(o['class'])
+    .then(getClassResult => {
+        const objectWithClassValid = objectValidator.createObjectWithClassCheck(o, getClassResult);
+        
+        if (!errorHandler.isValid(objectWithClassValid)) {
+            throw new Error("Object vs class error");
         }
-    );
+
+        objectModel.create(o, getClassResult)
+        .then(createObjectResult => {
+            res.status(200);
+            res.json(createObjectResult);
+        })
+        .catch(e => {
+            res.status(400);
+            res.json(errorHandler.createErrorResponse(e.message));
+            return;
+        });
+    })
+    .catch(e => {
+        res.status(400);
+        res.json(errorHandler.createErrorResponse(e.message));
+        return;
+    });
+    
 };
 
 exports.update = function(req, res) {
@@ -590,9 +475,3 @@ exports.find2 = function(req, res) {
     
 };
 
-// var myPromise = new Promise(function(resolve, reject){
-// })
-
-exports.awaitTest = function(req, res) {
-    logger.log('objectController.awaitTest', {type: 'function'});
-};

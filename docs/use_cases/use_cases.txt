@@ -1,0 +1,18 @@
+1. Híd építése
+2. Érzékelés
+    - egy ember érzékeli az égzengést
+3. Történet leírása
+4. Sportesemémy dokumentálása
+5. Olyan rendszert keresek, ami az alabbiakat tudja:
+    ▪ Partnerek nyilvantartasa
+    ▪ Raktar / keszlet nyilvantartasa
+    ▪ Webaruhazzal szinkronizalhato: 
+    - automata szamlageneralas
+    - tobb arat kepes kezelni (gyakorlati pelda: vasarloi ar vs. viszonteladoi ar)
+--
+1. Híd építése
+    create class {"name":"Project"}
+    create object {"class":"#Project","name":"A Dél-Pesti gyalogos híd építése"}
+    create object {"class":"#Profile","parent":"#creator user","actions":["crud_*"]}
+    
+--

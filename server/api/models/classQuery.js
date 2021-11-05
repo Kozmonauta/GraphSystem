@@ -2,64 +2,58 @@
 
 var classQuery = {
 
-    create: function(data) {
+    create: function(c) {
         logger.log('classQuery.create', {type: 'function'});
 
-        var fields = JSON.stringify(data.fields);
-        var form = JSON.stringify(data.form);
-        var list = utils.JSONToString(data.list);
-        var filter = utils.JSONToString(data.filter);
-        var edges = utils.JSONToString(data.edges);
-        var events = utils.JSONToString(data.events);
+        var classData = {
+            "name": c.name,
+            "nodes": JSON.stringify(c.nodes),
+            "edges": JSON.stringify(c.edges)
+        };
+        var classDataString = '';
+        
+        for (var pk in classData) {
+            classDataString += pk + ':' + utils.formatField(classData[pk]) + ',';
+        }
+        classDataString = classDataString.substring(0, classDataString.length - 1);
         
         var query = '';
         
-        if (data['extends'] !== undefined) {
-            query += 'MATCH (c:Class) WHERE c.id="' + data['extends'].id + '" ';
-        }
-        
-        if (data['defines'] !== undefined) {
-            if (data['defines'].label !== undefined) {
-                query += 'MATCH (d:' + data['defines'].label + ') WHERE d.id="' + data['defines'].id + '" ';
-            } else {
-                query += 'MATCH (d) WHERE d.id="' + data['defines'].id + '" ';
+        if (c['extends'] !== undefined) {
+            if (typeof c['extends'] === 'string') {
+                query += 'MATCH (cp:Class) WHERE cp.id="' + c['extends'] + '" ';
+            } else
+            if (Array.isArray(c['extends'])) {
+                for (var i=0;i<c['extends'].length;i++) {
+                    query += 'MATCH (cp' + i + ':Class) WHERE cp.id="' + c['extends'][i] + '" ';
+                }
             }
         }
         
-        query += 'CREATE (n:Class{';
-        query += 'id:apoc.create.uuid(),';
-        query += 'label:"' + data.label + '"';
-        
-        if (data.name !== undefined) {
-            query += 'name:"' + data.name + '",';
+        if (typeof c['definer'] === 'string') {
+            query += 'MATCH (d) WHERE d.id="' + c['definer'] + '" ';
+        } else {
+            if (c['definer'].label !== undefined) {
+                query += 'MATCH (d:' + c['definer'].label + ') WHERE d.id="' + c['definer'].id + '" ';
+            } else {
+                query += 'MATCH (d) WHERE d.id="' + c['definer'].id + '" ';
+            }
         }
         
-        if (fields !== undefined) 
-            query += ",fields:'" + fields + "'";
+        query += 'CREATE (d)-[:D]->(c:Class{id:apoc.create.uuid(),' + classDataString + '}) ';
         
-        if (form !== undefined) 
-            query += ",form:'" + form + "'";
-        
-        if (list !== undefined) 
-            query += ",list:'" + list + "'";
-        
-        if (edges !== undefined) 
-            query += ",edges:'" + edges + "'";
-        
-        if (events !== undefined) 
-            query += ", events:'" + events + "'";
-        
-        query += '})';
-        
-        if (data['extends'] !== undefined) {
-            query += '-[:E]->(c)';
+        if (c['extends'] !== undefined) {
+            if (typeof c['extends'] === 'string') {
+                query += 'CREATE (c)-[:E]->(cp) ';
+            } else
+            if (Array.isArray(c['extends'])) {
+                for (var i=0;i<c['extends'].length;i++) {
+                    query += 'CREATE (c)-[:E]->(cp[' + i + ') ';
+                }
+            }
         }
         
-        if (data['defines'] !== undefined) {
-            query += '<-[:D]-(d)';
-        }
-        
-        query += ' RETURN n;';
+        query += ' RETURN c;';
         console.log('query', query);
 
         return query;
@@ -210,7 +204,7 @@ var classQuery = {
     get: function(filter, options) {
         logger.log('classQuery.get', {type: 'function'});
         var query = '';
-        
+
         switch (options.mode) {
             // Just the node
             case 'simple':
@@ -223,7 +217,7 @@ var classQuery = {
                 query += 'RETURN dn.collectInheritData(n.id,"Class","E","out",null) AS c';
                 break;
         }
-        console.log('query', query);
+        // console.log('query', query);
 
         return query;
     },

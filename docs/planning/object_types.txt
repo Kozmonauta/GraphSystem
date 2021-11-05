@@ -1,0 +1,47 @@
+1. POST /classes
+{
+    "name": "User",
+    "definer": "3aee394b-7ae9-4c83-a6b5-83f98592738d",
+    "nodes": {
+        "profile": {
+            "label": "User",
+            "fields": {
+                "name": {
+                    "type": "string",
+                    "required": true
+                }
+            }
+        },
+        "account": {
+            "label": "Account",
+            "fields": {
+                "email": {
+                    "type": "string",
+                    "required": true
+                },
+                "password": {
+                    "type": "string",
+                    "required": true
+                }
+            }
+        }
+    },
+    "edges": {
+        "authenticator": {
+            "type": "A",
+            "direction": "in",
+            "multiple": true,
+            "required": true
+        }
+    },
+    "events": {
+        "createSuccess": [
+            {
+                "action": "createObject",
+                "parameters": {
+                    "class": "Account"
+                }
+            }
+        ]
+    }
+}

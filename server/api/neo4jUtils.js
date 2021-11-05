@@ -11,17 +11,17 @@ var neo4jUtils = {
     formatRecord: function(record, options) {
         if (options === undefined) options = {};
         var res = {};
-
+// console.log('FR', utils.showJSON(record));
         for (var i=0;i<record.keys.length;i++) {
             var fieldKey = record.keys[i];
             var fieldData = record._fields[record._fieldLookup[fieldKey]];
             
             // if field is Node
-            if (fieldData.identity !== undefined) {
+            if (fieldData !== null && fieldData.identity !== undefined) {
                 res[fieldKey] = this.formatNode(fieldData);
             } else 
             // if field is Integer
-            if (fieldData.low !== undefined) {
+            if (fieldData !== null && fieldData.low !== undefined) {
                 res[fieldKey] = this.formatInteger(fieldData);
             } else 
             // other field types
@@ -40,8 +40,9 @@ var neo4jUtils = {
     // Format node
     formatNode: function(node) {
         let res = {};
-        
-        res.ID = this.formatInteger(node.identity);
+        // console.log('node', node);
+        // res.ID = this.formatInteger(node.identity);
+        // res.id = res.
         res.labels = node.labels;
         if (node.classID !== undefined) res.classID = node.classID;
         res.fields = {};
@@ -49,13 +50,23 @@ var neo4jUtils = {
         for (let pk in node.properties) {
             const property = node.properties[pk];
             
-            // if field is Integer
-            if (property.low !== undefined) {
-                res.fields[pk] = this.formatInteger(property);
+            if (pk === 'id') {
+                res['id'] = property;
             } else 
-            // other field types
-            {
-                res.fields[pk] = property;
+            if (pk === '_classId') {
+                res['classId'] = property;
+            } else 
+            if (['_creator', '_createdOn'].includes(pk)) {
+                res[pk] = property;
+            } else {
+                // if field is Integer
+                if (property.low !== undefined) {
+                    res.fields[pk] = this.formatInteger(property);
+                } else 
+                // other field types
+                {
+                    res.fields[pk] = property;
+                }
             }
         }
         

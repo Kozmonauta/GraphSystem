@@ -33,15 +33,26 @@ var utils = {
         return v === true || v === "true";
     },
     
-    mergeObjects: function(o1, o2, options) {
-        if (o1 === undefined) o1 = {};
-        if (o2 === undefined) o2 = {};
+    // merges o2 into o1
+    // find the object fields with the same keys in o1 and o2 and if they are compatible then they become merged together into o1
+    mergeObjects: function(o1, o2) {
+        if (o1 === undefined || o2 === undefined) return;
+        if (o1 === undefined) return o2;
+        if (o2 === undefined) return o1;
         
         for (var k in o2) {
-            if ((o2[k] !== undefined && o2[k] !== null) || options === undefined || !options.skipEmpty) {
-                o1[k] = o2[k];
+            if (o2[k] === undefined) continue;
+            if (o1[k] === undefined) o1[k] = o2[k];
+            
+            if (Array.isArray(o2[k]) && Array.isArray(o1[k])) {
+                o1[k] = o1[k].concat(o2[k]);
+            } else 
+            
+            if (typeof o2[k] === 'object') {
+                o1[k] = this.mergeObjects(o1[k], o2[k]);
             }
         }
+        
         return o1;
     },
     
