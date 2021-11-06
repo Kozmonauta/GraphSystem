@@ -26,10 +26,12 @@ exports.create = function(req, res) {
     
     classModel.get(o['class'])
     .then(getClassResult => {
-        const objectWithClassValid = objectValidator.createObjectWithClassCheck(o, getClassResult);
+        const objectWithClassResult = objectValidator.createObjectWithClassCheck(o, getClassResult);
         
-        if (!errorHandler.isValid(objectWithClassValid)) {
-            throw new Error("Object vs class error");
+        if (!errorHandler.isValid(objectWithClassResult)) {
+            res.status(400);
+            res.json(objectWithClassResult);
+            return;
         }
 
         objectModel.create(o, getClassResult)

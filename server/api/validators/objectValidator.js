@@ -20,16 +20,74 @@ exports.createRequestCheck = function(o) {
         res.push({type: 'error', message: 'Edges is required'});
     }
     
+    if (typeof o.nodes !== 'object') {
+        res.push({type: 'error', message: 'Nodes must be presented as an object'});
+    }
+    
+    if (typeof o.edges !== 'object') {
+        res.push({type: 'error', message: 'Edges must be presented as an object'});
+    }
+    
     return res;
 };
 
 exports.createObjectWithClassCheck = function(o, c) {
-    var res = [];
+    let res = [];
     
-    // console.log('c', utils.showJSON(c));
-    // console.log('o', utils.showJSON(o));
-    // res.push({type: 'error', message: 'COWCC error'});
+    // Check invalid node keys
+    for (let nk in o.nodes) {
+        if (c.nodes[nk] === undefined) {
+            res.push({type: 'error', message: 'Invalid node key for class'});
+            return res;
+        }
+    }
+    
+    // Check invalid node fields
+    for (let nk in o.nodes) {
+        if (Object.keys(o.nodes[nk]).length > 0) {
+            if (c.nodes[nk].fields === undefined) {
+                res.push({type: 'error', message: 'Node [' + nk + '] must not have any fields'});
+                return res;
+            }
+            
+            for (let fk in o.nodes[nk]) {
+                if (c.nodes[nk].fields[fk] === undefined) {
+                    res.push({type: 'error', message: 'Invalid field [' + fk + '] key for node [' + nk + ']'});
+                    return res;
+                }
+            }
+        }
+    }
+    
+    // Check invalid edge keys
+    for (let ek in o.edges) {
+        if (c.edges[ek] === undefined) {
+            res.push({type: 'error', message: 'Invalid edge key for class'});
+            return res;
+        }
+    }
+    
+    // Check main node
+    let mainNodeKey;
+    
+    for (let ek in c.edges) {
+        let e = c.edges[ek];
+        if (e.type === 'H' && e.source === undefined) {
+            mainNodeKey = ek;
+        }
+    }
+    
+    if (o.edges[mainNodeKey] === undefined) {
+        res.push({type: 'error', message: 'Main node must be set'});
+    }
 
+    // Check multiple edges
+    for (let ek in o.edges) {
+        if (c.edges[ek].multiple === true) {
+            res.push({type: 'error', message: 'Multiple connections cannot be added in this request'});
+        }
+    }
+    
     return res;
 };
 

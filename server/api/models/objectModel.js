@@ -72,6 +72,7 @@ var objectModel = {
         const nodesToCheck = this.getNodesToCheck(objectData, classData);
         const caeQuery = objectQuery.checkAvailableEdges(nodesToCheck);
         const createQuery = objectQuery.create(objectData, classData);
+        // return;
         const neo4jSession = neo4jDriver.session();
         const txc = neo4jSession.beginTransaction();
 
@@ -104,7 +105,6 @@ var objectModel = {
             console.log('txc return', result);
             
             await txc.commit();
-            
             return result;
         } catch (e) {
             await txc.rollback();

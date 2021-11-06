@@ -14,6 +14,16 @@ exports.create = function(c) {
     return errors;
 };
 
+exports.createResultCheck = function(cr) {
+    let errors = [];
+    
+    if (cr.records === undefined || cr.records.length === 0) {
+        errors.push({
+            message: 'Class could not be created'
+        });
+    } 
+};
+
 exports.checkRequired = function(res, o, c, options) {
     if (options === undefined) options = {};
     

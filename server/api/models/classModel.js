@@ -9,22 +9,20 @@ var classModel = {
         logger.log('classModel.create', {type: 'function'});
 
         // https://neo4j.com/docs/api/javascript-driver/current/
-        let result;
-        let neo4jSession = neo4jDriver.session();
+        const neo4jSession = neo4jDriver.session();
         const txc = neo4jSession.beginTransaction();
         
         try {
-            // let currentData = await txc.run(classQuery.getCurrent(data));
-            result = await txc.run(classQuery.create(data));
-            console.log("model succ");
+            const resultRaw = await txc.run(classQuery.create(data));
+            const result = neo4jUtils.formatRecord(resultRaw.records[0], {singleRecord: true});
+
             await txc.commit();
-        } catch (error) {
+            return result;
+        } catch (e) {
             await txc.rollback();
-            console.log("model err");
-            result = error;
+            throw e;
         } finally {
             await neo4jSession.close();
-            return neo4jUtils.formatRecord(result.records[0], {singleRecord: true});
         }
     },
     

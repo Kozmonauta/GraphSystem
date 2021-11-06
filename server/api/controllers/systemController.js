@@ -6,11 +6,20 @@ var objectModel = require('../models/objectModel');
 var classService = require('../services/classService');
 var objectService = require('../services/objectService');
 var systemConfig = require("../../config/system_init.json");
+var systemValidator = require('../validators/systemValidator');
+var errorHandler = require('../errorHandler');
 
 // Creates the initial database: core node, default classes, default objects
 exports.create = function(req, res) {
     logger.log('systemController.create', {type: 'function'});
     
+    const sccResult = systemValidator.systemConfigCheck(systemConfig);
+    if (!errorHandler.isValid(sccResult)) {
+        res.status(400);
+        res.json(sccResult);
+        return;
+    }
+        
     // Is system already initialized?
     systemModel.hasCore()
     .then(hasCoreResult => {
@@ -21,41 +30,19 @@ exports.create = function(req, res) {
         // Create core
         systemModel.createCore()
         .then(createCoreResult => {
-            var defaultClasses = systemConfig.classes;
-            var profileClass = defaultClasses['Profile'];
-            
-            profileClass.definer = createCoreResult.id;
-            
-            classModel.create(profileClass)
-            .then(createProfileClassResult => {
-                var userClass = defaultClasses['User'];
-                userClass.definer = createCoreResult.id;
-                userClass['extends'] = createProfileClassResult.id;
-
-                classModel.create(userClass)
-                .then(createUserClassResult => {
-                    res.status(200);
-                    res.json({"message": "Created"});
-                })
-                .catch(e => {
-                    console.log('createUserClassError');
-                    throw new Error(e);
-                });
-            })
-            .catch(e => {
-                console.log('createProfileClassError');
-                throw new Error(e);
-            });
+            res.status(200);
+            res.json(createCoreResult);
         })
         .catch(e => {
-            console.log('createCoreError');
-            throw new Error(e);
+            res.status(400);
+            res.json(errorHandler.createErrorResponse(e.message));
+            return;
         });
     })
     .catch(e => {
-        console.log(e);
         res.status(400);
-        res.json({"errors": [{"message": "Error"}]});
+        res.json(errorHandler.createErrorResponse(e.message));
+        return;
     });
 };
 

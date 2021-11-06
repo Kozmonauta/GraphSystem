@@ -5,67 +5,38 @@ var objectModel = require('../models/objectModel');
 var userModel = require('../models/userModel');
 var classService = require('../services/classService');
 var classValidator = require('../validators/classValidator');
+var errorHandler = require('../errorHandler');
 
 exports.create = function(req, res) {
     logger.log('classController.create', {type: 'function'});
     
-    var classData = req.body;
-    var errors = classValidator.create(classData);
+    var c = req.body;
+    console.log('c', c);
+    var cResult = classValidator.create(c);
     
-    if (errors.length) {
+    if (!errorHandler.isValid(cResult)) {
         res.status(400);
-        res.json(errors);
+        res.json(cResult);
         return;
     }
     
-    classModel
-        .create(classData)
-        .then(result => {
-            // error
-            if (result.records === undefined) {
-                res.status(400);
-                res.json({
-                    "errors": [
-                        {
-                            "message": texts.class.create.error
-                        }
-                    ]
-                });
-            } 
-            // error
-            else if (result.records.length === 0) {
-                res.status(400);
-                res.json({
-                    "errors": [
-                        {
-                            "message": texts.class.create.error_non_existing_node
-                        }
-                    ]
-                });
-            } 
-            // success
-            else {
-                const singleRecord = result.records[0];
-                const node = singleRecord.get(0);
-
-                res.status(200);
-                res.json({
-                    "message": texts.class.create.success,
-                    "node": utils.formatNode(node)
-                });            
-            } 
-        }, result => {
+    classModel.create(c)
+    .then(createClassResult => {
+        var ccResult = classValidator.createResultCheck(createClassResult);
+        
+        if (!errorHandler.isValid(ccResult)) {
             res.status(400);
-            logger.log("classController.create classModel.create failed");
-            res.json({
-                "errors": [
-                    {
-                        "message": texts.class.create.error
-                    }
-                ]
-            });            
-        })
-    ;
+            res.json(ccResult);
+            return;
+        }
+
+        res.status(200);
+        res.json(createClassResult);            
+    })
+    .catch(e => {
+        res.status(400);
+        res.json(errorHandler.createErrorResponse(e.message));
+    });
 };
 
 exports.createSimple = function(req, res) {

@@ -1,0 +1,96 @@
+{
+    "Tree": {
+        "name": "Tree",
+        "nodes": {
+            "main": {
+                "label": "Tree"
+            }
+        },
+        "edges": {
+            "parent": {
+                "target": "main",
+                "type": "H"
+            },
+            "children": {
+                "source": "main",
+                "type": "H",
+                "multiple": true
+            }
+        }
+    },
+    "Profile": {
+        "name": "Profile",
+        "nodes": {
+            "main": {
+                "label": "Profile",
+                "fields": {
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "edges": {
+            "controls": {
+                "source": "main",
+                "type": "C"
+            },
+            "parent": {
+                "target": "main",
+                "type": "H"
+            },
+            "children": {
+                "source": "main",
+                "type": "H",
+                "multiple": true
+            }
+        }
+    },
+    "User": {
+        "name": "User",
+        "extends": "Profile",
+        "nodes": {
+            "account": {
+                "label": "Account",
+                "fields": {
+                    "email": {
+                        "type":"string"
+                    },
+                    "password": {
+                        "type":"string"
+                    }
+                }
+            }
+        },
+        "edges": {
+            "authentication": {
+                "type": "A",
+                "source": "account",
+                "target": "main"
+            }
+        }
+    },
+    "Project": {
+        "name": "Project",
+        "nodes": {
+            "project": {
+                "label": "Project",
+                "fields": {
+                    "name": {
+                        "type":"string"
+                    },
+                    "size": {
+                        "type":"number"
+                    }
+                }
+            }
+        },
+        "edges": {
+            "authentication": {
+                "type": "A",
+                "source": "account",
+                "target": "profile"
+            }
+        }
+    }
+}

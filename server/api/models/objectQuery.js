@@ -28,6 +28,33 @@ var objectQuery = {
                         for (let fk in o.nodes[nnk]) {
                             objectFieldsString += fk + ':' + utils.formatField(o.nodes[nnk][fk]) + ',';
                         }
+                        
+                        if (c.nodes[nnk].main === true) {
+                            // store class reference in main node
+                            objectFieldsString += 'class:"' + c.id + '",';
+                            
+                            // store available class info in main node
+                            for (let mek in c.edges) {
+                                let me = c.edges[mek];
+                                if (o.edges[mek] === undefined && (me.source === undefined || me.target === undefined)) {
+                                    let acs = '_';
+                                    if (me.source === undefined) {
+                                        acs += 'i';
+                                    } else
+                                    if (me.target === undefined) {
+                                        acs += 'o';
+                                    }
+                                    acs += 'e_' + me.type;
+                                    objectFieldsString += acs + ':';
+                                    if (me.multiple === true) {
+                                        objectFieldsString += '-1,';
+                                    } else {
+                                        objectFieldsString += '1,';
+                                    }
+                                }
+                            }
+                        }
+                        
                         objectFieldsString = objectFieldsString.substring(0, objectFieldsString.length - 1);
 
                         if (!newNodes.includes(nnk)) {
@@ -78,7 +105,7 @@ var objectQuery = {
 
         for (let ek in o.edges) {
             let e = o.edges[ek];
-            
+
             // if edge.target is an external node
             if (e.target !== undefined) {
                 if (!this.isNodeAliased(e.target, externalNodes)) {
@@ -89,13 +116,17 @@ var objectQuery = {
                 e.target = nodeAlias;
             } else 
             // if edge.source is an external node
-            if (e.source !== undefined) { 
+            if (e.source !== undefined) {
                 if (!this.isNodeAliased(e.source, externalNodes)) {
                     nodeAlias = 'en_' + (++eni);
                     externalNodes[nodeAlias] = e.source;
                     query += 'MATCH (' + nodeAlias + ') WHERE ' + nodeAlias + '.id="' + e.source + '" ';
                 }
                 e.source = nodeAlias;
+
+                if (c.edges[ek].type === 'H') {
+                    c.nodes[c.edges[ek].target].main = true;
+                }
             }
         }
         
@@ -104,11 +135,12 @@ var objectQuery = {
             nodes.push(nk);
         }
         
-        let edges = utils.mergeObjects(o.edges, c.edges);
+        let edges = JSON.parse(JSON.stringify(o.edges));
+        utils.mergeObjects(edges, c.edges);
         
         console.log('o', utils.showJSON(o));
         console.log('c', utils.showJSON(c));
-        console.log('edges', utils.showJSON(edges));
+        // console.log('edges', utils.showJSON(edges));
         
         while (Object.keys(edges).length > 0) {
             let cefnResult = this.createEdgesForNodes(nodes, edges, o, c);
