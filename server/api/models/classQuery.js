@@ -25,7 +25,7 @@ var classQuery = {
             } else
             if (Array.isArray(c['extends'])) {
                 for (var i=0;i<c['extends'].length;i++) {
-                    query += 'MATCH (cp' + i + ':Class) WHERE cp.id="' + c['extends'][i] + '" ';
+                    query += 'MATCH (cp' + i + ':Class) WHERE cp' + i + '.id="' + c['extends'][i] + '" ';
                 }
             }
         }
@@ -48,7 +48,7 @@ var classQuery = {
             } else
             if (Array.isArray(c['extends'])) {
                 for (var i=0;i<c['extends'].length;i++) {
-                    query += 'CREATE (c)-[:E]->(cp[' + i + ') ';
+                    query += 'CREATE (c)-[:E]->(cp' + i + ') ';
                 }
             }
         }

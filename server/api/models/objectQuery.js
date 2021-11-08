@@ -2,7 +2,7 @@
 
 var objectQuery = {
 
-    createEdgesForNodes: function(nodes, edges, o, c) {
+    createEdgesForNodes: function(nodes, edges, o, c, mainNodeKey) {
         let query = '';
         let newNodes = [];
         let newEdges = [];
@@ -29,7 +29,7 @@ var objectQuery = {
                             objectFieldsString += fk + ':' + utils.formatField(o.nodes[nnk][fk]) + ',';
                         }
                         
-                        if (c.nodes[nnk].main === true) {
+                        if (nnk === mainNodeKey) {
                             // store class reference in main node
                             objectFieldsString += 'class:"' + c.id + '",';
                             
@@ -102,7 +102,8 @@ var objectQuery = {
         let externalNodes = {};
         let eni = 0;
         let nodeAlias;
-
+        let mainNodeKey;
+        
         for (let ek in o.edges) {
             let e = o.edges[ek];
 
@@ -125,7 +126,7 @@ var objectQuery = {
                 e.source = nodeAlias;
 
                 if (c.edges[ek].type === 'H') {
-                    c.nodes[c.edges[ek].target].main = true;
+                    mainNodeKey = c.edges[ek].target;
                 }
             }
         }
@@ -143,7 +144,7 @@ var objectQuery = {
         // console.log('edges', utils.showJSON(edges));
         
         while (Object.keys(edges).length > 0) {
-            let cefnResult = this.createEdgesForNodes(nodes, edges, o, c);
+            let cefnResult = this.createEdgesForNodes(nodes, edges, o, c, mainNodeKey);
             nodes = cefnResult.nodes;
             for (let i=0; i<cefnResult.edges.length; i++) {
                 delete edges[cefnResult.edges[i]];
@@ -151,7 +152,7 @@ var objectQuery = {
             query += cefnResult.query;
         }
         
-        query += 'RETURN true;';
+        query += 'RETURN ' + mainNodeKey + ';';
         
         console.log('query', query);
 

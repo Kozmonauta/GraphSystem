@@ -5,12 +5,6 @@ var generalValidator = require('../validators/generalValidator');
 exports.create = function(c) {
     let errors = [];
     
-    if (utils.isEmpty(c.label)) {
-        errors.push({
-            message: texts.class.create.label_required
-        });
-    }
-    
     return errors;
 };
 
