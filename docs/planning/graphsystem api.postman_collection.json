@@ -1,0 +1,469 @@
+{
+	"info": {
+		"_postman_id": "8a996c0e-3e73-49d4-83ab-779294316958",
+		"name": "graphsystem api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Init",
+			"item": [
+				{
+					"name": "Clear database",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.unset(\"coreID\");\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/system/clear",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"system",
+								"clear"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Init System",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();\r",
+									"pm.environment.set(\"coreID\", res.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json;charset=UTF-8"
+							},
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/system",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"system"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create class Tree",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();\r",
+									"pm.environment.set(\"classTreeID\", res.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json;charset=UTF-8"
+							},
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Tree\",\r\n    \"definer\": \"{{coreID}}\",\r\n    \"nodes\": {\r\n        \"main\": {\r\n            \"label\": \"Tree\"\r\n        }\r\n    },\r\n    \"edges\": {\r\n        \"parent\": {\r\n            \"target\": \"main\",\r\n            \"type\": \"H\"\r\n        },\r\n        \"children\": {\r\n            \"source\": \"main\",\r\n            \"type\": \"H\",\r\n            \"multiple\": true\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/classes",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"classes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create class Controllable",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();\r",
+									"pm.environment.set(\"classControllableID\", res.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json;charset=UTF-8"
+							},
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Controllable\",\r\n    \"definer\": \"{{coreID}}\",\r\n    \"nodes\": {\r\n        \"main\": {\r\n        }\r\n    },\r\n    \"edges\": {\r\n        \"controlled\": {\r\n            \"target\": \"main\",\r\n            \"type\": \"C\",\r\n            \"multiple\": true\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/classes",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"classes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create class Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();\r",
+									"pm.environment.set(\"classProfileID\", res.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json;charset=UTF-8"
+							},
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Profile\",\r\n    \"definer\": \"{{coreID}}\",\r\n    \"extends\": [\"{{classTreeID}}\", \"{{classControllableID}}\"],\r\n    \"nodes\": {\r\n        \"main\": {\r\n            \"label\": \"Profile\",\r\n            \"fields\": {\r\n                \"actions\": {\r\n                    \"type\": \"array\"\r\n                }\r\n            }\r\n        }\r\n    },\r\n    \"edges\": {\r\n        \"controls\": {\r\n            \"source\": \"main\",\r\n            \"type\": \"C\"\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/classes",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"classes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create class User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();\r",
+									"pm.environment.set(\"classUserID\", res.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json;charset=UTF-8"
+							},
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"User\",\r\n    \"definer\": \"{{coreID}}\",\r\n    \"extends\": \"{{classProfileID}}\",\r\n    \"nodes\": {\r\n        \"main\": {\r\n            \"fields\": {\r\n                \"name\": {\r\n                    \"type\": \"string\"\r\n                }\r\n            }\r\n        },\r\n        \"account\": {\r\n            \"label\": \"Account\",\r\n            \"fields\": {\r\n                \"email\": {\r\n                    \"type\":\"string\"\r\n                },\r\n                \"password\": {\r\n                    \"type\":\"string\"\r\n                }\r\n            }\r\n        }\r\n    },\r\n    \"edges\": {\r\n        \"authentication\": {\r\n            \"type\": \"A\",\r\n            \"source\": \"account\",\r\n            \"target\": \"main\"\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/classes",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"classes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create User Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();\r",
+									"pm.environment.set(\"userAdminID\", res.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json;charset=UTF-8"
+							},
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"class\": \"{{classUserID}}\",\r\n    \"nodes\": {\r\n        \"main\": {\r\n            \"name\": \"Core\"\r\n        },\r\n        \"account\": {\r\n            \"email\": \"core@graphsystem.io\",\r\n            \"password\": \"admin123\"\r\n        }\r\n    },\r\n    \"edges\": {\r\n        \"controls\": {\r\n            \"target\": \"{{coreID}}\"\r\n        },\r\n        \"parent\": {\r\n            \"source\": \"{{coreID}}\"\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/objects",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"objects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create class Paca1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();\r",
+									"pm.environment.set(\"classPaca1ID\", res.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json;charset=UTF-8"
+							},
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Paca1\",\r\n    \"definer\": \"{{coreID}}\",\r\n    \"extends\": [\"{{classTreeID}}\", \"{{classControllableID}}\"],\r\n    \"nodes\": {\r\n        \"a\": {\r\n            \"label\": \"A\",\r\n            \"fields\": {\r\n                \"name\": {\r\n                    \"type\": \"string\"\r\n                }\r\n            }\r\n        },\r\n        \"main\": {\r\n            \"label\": \"B\",\r\n            \"fields\": {\r\n                \"name\": {\r\n                    \"type\": \"string\"\r\n                }\r\n            }\r\n        },\r\n        \"c\": {\r\n            \"label\": \"C\",\r\n            \"fields\": {\r\n                \"name\": {\r\n                    \"type\": \"string\"\r\n                }\r\n            }\r\n        },\r\n        \"d\": {\r\n            \"label\": \"D\",\r\n            \"fields\": {\r\n                \"name\": {\r\n                    \"type\": \"string\"\r\n                }\r\n            }\r\n        },\r\n        \"e\": {\r\n            \"label\": \"E\",\r\n            \"fields\": {\r\n                \"name\": {\r\n                    \"type\": \"string\"\r\n                }\r\n            }\r\n        },\r\n        \"f\": {\r\n            \"label\": \"F\",\r\n            \"fields\": {\r\n                \"name\": {\r\n                    \"type\": \"string\"\r\n                }\r\n            }\r\n        },\r\n        \"g\": {\r\n            \"label\": \"G\",\r\n            \"fields\": {\r\n                \"name\": {\r\n                    \"type\": \"string\"\r\n                }\r\n            }\r\n        }\r\n    },\r\n    \"edges\": {\r\n        \"ba\": {\r\n            \"source\": \"main\",\r\n            \"target\": \"a\",\r\n            \"type\": \"IE\"\r\n        },\r\n        \"af\": {\r\n            \"source\": \"a\",\r\n            \"target\": \"f\",\r\n            \"type\": \"IE\"\r\n        },\r\n        \"f_out\": {\r\n            \"target\": \"f\",\r\n            \"type\": \"OF\"\r\n        },\r\n        \"ef\": {\r\n            \"source\": \"e\",\r\n            \"target\": \"f\",\r\n            \"type\": \"IE\"\r\n        },\r\n        \"eg\": {\r\n            \"source\": \"e\",\r\n            \"target\": \"g\",\r\n            \"type\": \"IE\"\r\n        },\r\n        \"g_out\": {\r\n            \"source\": \"g\",\r\n            \"type\": \"OG\"\r\n        },\r\n        \"de\": {\r\n            \"source\": \"d\",\r\n            \"target\": \"e\",\r\n            \"type\": \"IE\"\r\n        },\r\n        \"d_out1\": {\r\n            \"source\": \"d\",\r\n            \"type\": \"DO\"\r\n        },\r\n        \"d_out2\": {\r\n            \"target\": \"d\",\r\n            \"type\": \"DI\"\r\n        },\r\n        \"cd\": {\r\n            \"source\": \"c\",\r\n            \"target\": \"d\",\r\n            \"type\": \"IE\"\r\n        },\r\n        \"bc\": {\r\n            \"source\": \"main\",\r\n            \"target\": \"c\",\r\n            \"type\": \"IE\"\r\n        }\r\n    }    \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/classes",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"classes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Paca1 KószaPaca",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();\r",
+									"pm.environment.set(\"Paca1KószaPacaID\", res.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json;charset=UTF-8"
+							},
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"class\": \"{{classPaca1ID}}\",\r\n    \"nodes\": {\r\n        \"a\": {\r\n            \"name\": \"PacA\"\r\n        },\r\n        \"main\": {\r\n            \"name\": \"Paca B (main)\"\r\n        },\r\n        \"c\": {\r\n            \"name\": \"PaCa\"\r\n        },\r\n        \"d\": {\r\n            \"name\": \"Paca-D\"\r\n        },\r\n        \"e\": {\r\n            \"name\": \"PEca\"\r\n        },\r\n        \"f\": {\r\n            \"name\": \"PacaF\"\r\n        },\r\n        \"g\": {\r\n            \"name\": \"PacaG\"\r\n        }\r\n    },\r\n    \"edges\": {\r\n        \"parent\": {\r\n            \"source\": \"{{coreID}}\"\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/objects",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"objects"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

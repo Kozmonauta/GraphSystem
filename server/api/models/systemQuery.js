@@ -7,7 +7,7 @@ var systemQuery = {
     },
     
     createCore: function() {
-        return 'CREATE (Core:Core{id:apoc.create.uuid(), _oe_H:-1, _ie_C:-1}) RETURN Core.id AS id;';
+        return 'CREATE (Core:Core{id:apoc.create.uuid(), _o_H:-1, _i_C:-1}) RETURN Core.id AS id;';
     },
     
     getInheritClasses: function(core) {

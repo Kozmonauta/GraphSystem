@@ -2,18 +2,24 @@
 
 var objectQuery = {
 
-    createEdgesForNodes: function(nodes, edges, o, c, mainNodeKey) {
+    createEdgesForNodes: function(nodes, edges, o, c, mainNodeData) {
         let query = '';
         let newNodes = [];
         let newEdges = [];
+// console.log('---------');
+// console.log('nodes', nodes);
         
         for (let i=0; i<nodes.length; i++) {
             const nk = nodes[i];
+// console.log('--');
+// console.log('nk', nk);
             
             for (let ek in edges) {
                 let e = edges[ek];
                 
                 if (e.target === nk || e.source === nk) {
+// console.log('ek', ek);
+// console.log('e', e);
                     let nnk;
                     
                     if (e.target === nk) {
@@ -22,42 +28,62 @@ var objectQuery = {
                     if (e.source === nk) {
                         nnk = e.target;
                     }
+// console.log('nnk', nnk);
+// TODO Insert id link for connected internal nodes to main node's fields. Hint: let main node creation for last and previously created node ids can be inserted.
 
+                    // If the connected new node is referenced in the edges of the class
                     if (nnk !== undefined) {
-                        let objectFieldsString = '';
-                        for (let fk in o.nodes[nnk]) {
-                            objectFieldsString += fk + ':' + utils.formatField(o.nodes[nnk][fk]) + ',';
-                        }
                         
-                        if (nnk === mainNodeKey) {
-                            // store class reference in main node
-                            objectFieldsString += 'class:"' + c.id + '",';
+                        // If node was not created yet
+                        if (!newNodes.includes(nnk)) {
+                            let objectFieldsString = '';
                             
-                            // store available class info in main node
-                            for (let mek in c.edges) {
-                                let me = c.edges[mek];
-                                if (o.edges[mek] === undefined && (me.source === undefined || me.target === undefined)) {
-                                    let acs = '_';
-                                    if (me.source === undefined) {
-                                        acs += 'i';
-                                    } else
-                                    if (me.target === undefined) {
-                                        acs += 'o';
-                                    }
-                                    acs += 'e_' + me.type;
-                                    objectFieldsString += acs + ':';
-                                    if (me.multiple === true) {
-                                        objectFieldsString += '-1,';
-                                    } else {
-                                        objectFieldsString += '1,';
+                            for (let fk in o.nodes[nnk]) {
+                                objectFieldsString += fk + ':' + utils.formatField(o.nodes[nnk][fk]) + ',';
+                            }
+
+                            if (nnk === mainNodeData.key) {
+                                // store class reference in main node
+                                objectFieldsString += 'class:"' + c.id + '",';
+                                
+                                // store available class info in main node
+                                for (let mek in c.edges) {
+                                    let me = c.edges[mek];
+                                    if (o.edges[mek] === undefined && (me.source === undefined || me.target === undefined)) {
+                                        let acs = '_';
+                                        let acNodeKey;
+                                        
+                                        if (me.source === undefined) {
+                                            acs += 'i';
+                                            if (me.target !== nnk) {
+                                                acNodeKey = me.target;
+                                            }
+                                        } else
+                                        if (me.target === undefined) {
+                                            acs += 'o';
+                                            if (me.source !== nnk) {
+                                                acNodeKey = me.source;
+                                            }
+                                        }
+                                        
+                                        acs += '_' + me.type;
+                                        objectFieldsString += acs + ':';
+                                        
+                                        if (me.multiple === true) {
+                                            objectFieldsString += '-1,';
+                                        } else {
+                                            objectFieldsString += '1,';
+                                        }
+                                        
+                                        if (acNodeKey !== undefined) {
+                                            mainNodeData.relatedNodes[acs] = acNodeKey;
+                                        }
                                     }
                                 }
-                            }
-                        }
-                        
-                        objectFieldsString = objectFieldsString.substring(0, objectFieldsString.length - 1);
+                            }                       
+                            
+                            objectFieldsString = objectFieldsString.substring(0, objectFieldsString.length - 1);
 
-                        if (!newNodes.includes(nnk)) {
                             query += 'CREATE (' + nnk + ':' + c.nodes[nnk].label;
                             query += '{id:apoc.create.uuid(),' + objectFieldsString + '})';
                             
@@ -85,7 +111,7 @@ var objectQuery = {
             edges: newEdges
         }
     },
-    
+     
     isNodeAliased: function(id, nodes) {
         for (let nk in nodes) {
             if (id === nodes[nk]) return true;
@@ -93,7 +119,7 @@ var objectQuery = {
         return false;
     },
     
-    create: function(o, c) {
+    create: function(o, c, destNonMainNodes) {
         logger.log('objectQuery.create', {type: 'function'});
         
         let query = '';
@@ -102,8 +128,10 @@ var objectQuery = {
         let externalNodes = {};
         let eni = 0;
         let nodeAlias;
-        let mainNodeKey;
-        
+        let mainNodeData = {
+            relatedNodes: {}
+        };        
+        console.log('destNonMainNodes', destNonMainNodes);
         for (let ek in o.edges) {
             let e = o.edges[ek];
 
@@ -126,11 +154,11 @@ var objectQuery = {
                 e.source = nodeAlias;
 
                 if (c.edges[ek].type === 'H') {
-                    mainNodeKey = c.edges[ek].target;
+                    mainNodeData.key = c.edges[ek].target;
                 }
             }
         }
-        
+        console.log('externalNodes', externalNodes);
         let nodes = [];
         for (let nk in externalNodes) {
             nodes.push(nk);
@@ -144,7 +172,7 @@ var objectQuery = {
         // console.log('edges', utils.showJSON(edges));
         
         while (Object.keys(edges).length > 0) {
-            let cefnResult = this.createEdgesForNodes(nodes, edges, o, c, mainNodeKey);
+            let cefnResult = this.createEdgesForNodes(nodes, edges, o, c, mainNodeData);
             nodes = cefnResult.nodes;
             for (let i=0; i<cefnResult.edges.length; i++) {
                 delete edges[cefnResult.edges[i]];
@@ -152,7 +180,19 @@ var objectQuery = {
             query += cefnResult.query;
         }
         
-        query += 'RETURN ' + mainNodeKey + ';';
+        console.log('mainNodeData', mainNodeData);
+        if (Object.keys(mainNodeData.relatedNodes).length > 0) {
+            query += 'SET ';
+            for (let nk in mainNodeData.relatedNodes) {
+                let nk1 = nk.substring(0, 2);
+                let nk2 = nk.substring(2);
+                
+                query += mainNodeData.key + '.' + nk1 + 'i' + nk2 + '=' + mainNodeData.relatedNodes[nk] + '.id,';
+            }
+            query = query.substring(0, query.length - 1) + ' ';
+        }
+        
+        query += 'RETURN ' + mainNodeData.key + ';';
         
         console.log('query', query);
 
@@ -162,9 +202,9 @@ var objectQuery = {
     checkAvailableEdges: function(nodes) {
         logger.log('objectQuery.checkAvailableEdges', {type: 'function'});
 
-        var query = '';
+        let query = '';
         
-        for (var nk in nodes) {
+        for (let nk in nodes) {
             if (nodes[nk].label !== undefined) {
                 query += 'MATCH (n' + nk + ':' + nodes[nk].label + ') ';
             } else {
@@ -175,22 +215,25 @@ var objectQuery = {
         
         query += 'RETURN ';
         
-        for (var nk in nodes) {
-            var node = nodes[nk];
-            for (var i=0; i<node.edges.length; i++) {
-                query += 'n' + nk + '.';
+        for (let nk in nodes) {
+            const node = nodes[nk];
+            for (let i=0; i<node.edges.length; i++) {
+                let fieldName = 'n' + nk + '.';
                 
                 if (node.edges[i].direction === 'out') {
-                    query += '_oe_';
+                    fieldName += '_o';
                 } else {
-                    query += '_ie_';
+                    fieldName += '_i';
                 }
-                query += node.edges[i].type + ',';
+                // fieldName += node.edges[i].type;
+                
+                query += fieldName + '_' + node.edges[i].type + ',';
+                query += fieldName + 'i_' + node.edges[i].type + ',';
             }
         }
         query = query.substring(0, query.length - 1);
         
-        // console.log('query', query);
+        console.log('query', query);
         return query;
     },
     

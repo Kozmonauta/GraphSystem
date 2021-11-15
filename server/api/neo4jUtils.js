@@ -76,6 +76,18 @@ var neo4jUtils = {
     formatInteger: function(i) {
         // TODO do it better
         return i.low;
+    },
+    
+    // TODO implement function
+    findPath: function(c, n1Key, n2Key) {
+        let path = {};
+        // let pathFound = false;
+        // let edgesChecked = [];
+        
+        // while (edgesChecked.length < Object.keys(edges).length && pathFound === false) {
+        // }
+        
+        return path;
     }
     
 }

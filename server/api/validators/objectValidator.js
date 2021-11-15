@@ -4,6 +4,7 @@ var generalValidator = require('../validators/generalValidator');
 var objectModel = require('../models/objectModel');
 var userModel = require('../models/userModel');
 var errorHandler = require('../errorHandler');
+var neo4jUtils = require('../neo4jUtils');
 
 exports.createRequestCheck = function(o) {
     var res = [];
@@ -33,6 +34,14 @@ exports.createRequestCheck = function(o) {
 
 exports.createObjectWithClassCheck = function(o, c) {
     let res = [];
+    
+    // Check if all class nodes, which has >=1 incoming H/C edges and has >=1 outgoing H/C edges then they must be connected with a one way route of the same edge types
+    // This validator perhaps should be in classValidator
+    
+    // if (neo4jUtils.findPath(c, n1, n2) === undefined) {
+        // res.push({type: 'error', message: 'No path found between incoming and outgoing edges'});
+        // return res;
+    // }
     
     // Check invalid node keys
     for (let nk in o.nodes) {
@@ -85,6 +94,15 @@ exports.createObjectWithClassCheck = function(o, c) {
     for (let ek in o.edges) {
         if (c.edges[ek].multiple === true) {
             res.push({type: 'error', message: 'Multiple connections cannot be added in this request'});
+        }
+    }
+    
+    // TODO test this
+    // Check if object wants to override a class defined edge's internal connection
+    for (let ek in o.edges) {
+        if ((c.edges[ek].source !== undefined && o.edges[ek].source !== undefined) || 
+            (c.edges[ek].target !== undefined && o.edges[ek].target !== undefined)) {
+            res.push({type: 'error', message: 'Cannot overwrite class internal edge definition'});
         }
     }
     

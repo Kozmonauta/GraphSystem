@@ -71,7 +71,6 @@ var objectModel = {
         
         const nodesToCheck = this.getNodesToCheck(objectData, classData);
         const caeQuery = objectQuery.checkAvailableEdges(nodesToCheck);
-        const createQuery = objectQuery.create(objectData, classData);
         // return;
         const neo4jSession = neo4jDriver.session();
         const txc = neo4jSession.beginTransaction();
@@ -85,10 +84,21 @@ var objectModel = {
             }
             
             const caeResult = neo4jUtils.formatRecord(caeResultRaw.records[0]);
-            
+            console.log('caeResult', caeResult);
+            let destNonMainNodes = {};
             for (let fk in caeResult) {
-                if (caeResult[fk] === null || caeResult[fk] === 0) {
-                    throw new Error('No available connections');
+                let fkFieldName = fk.substring(fk.indexOf('.') + 1);
+                // fields like this: _o_H
+                if (fkFieldName.charAt(2) === '_') {
+                    if (caeResult[fk] === null || caeResult[fk] === 0) {
+                        throw new Error('No available connections');
+                    }
+                } else
+                // fields like this: _oi_H where o=outgoing, i=id
+                if (fkFieldName.charAt(3) === '_' && fkFieldName.charAt(2) === 'i') {
+                    if (caeResult[fk] !== null) {
+                        destNonMainNodes[fk] = caeResult[fk];
+                    }
                 }
             }
             
@@ -100,9 +110,10 @@ var objectModel = {
                 const uaeResult = await txc.run(uaeQuery);
             }
             
+            const createQuery = objectQuery.create(objectData, classData, destNonMainNodes);
             const createResult = await txc.run(createQuery);
             const result = neo4jUtils.formatRecord(createResult.records[0], {singleRecord: true});
-            console.log('txc return', result);
+            // console.log('txc return', result);
             
             await txc.commit();
             return result;

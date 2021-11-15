@@ -217,7 +217,7 @@ var classQuery = {
                 query += 'RETURN dn.collectInheritData(n.id,"Class","E","out",null) AS c';
                 break;
         }
-        // console.log('query', query);
+        console.log('query', query);
 
         return query;
     },

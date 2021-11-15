@@ -13,7 +13,7 @@ const uuidv1 = require('uuid/v1');
 
 exports.create = function(req, res) {
     logger.log('objectController.create', {type: 'function'});
-    
+
     const pid = req.headers.pid;
     const o = req.body;
     const crcResult = objectValidator.createRequestCheck(o);
@@ -50,7 +50,6 @@ exports.create = function(req, res) {
         res.json(errorHandler.createErrorResponse(e.message));
         return;
     });
-    
 };
 
 exports.update = function(req, res) {
