@@ -52,6 +52,31 @@ exports.create = function(req, res) {
     });
 };
 
+exports.findForEdge = function(req, res) {
+    logger.log('objectController.findForEdge', {type: 'function'});
+    
+    console.log('request:', req.query);
+    // TODO request validation
+    
+    const destinationEdge = {
+        type: req.query.t,
+        direction: req.query.d
+    };
+    
+    objectModel.findForEdge(destinationEdge)
+    .then(findForEdgeResult => {
+        console.log('result:', utils.showJSON(findForEdgeResult));
+        res.status(200);
+        res.json(findForEdgeResult);
+        return;
+    })
+    .catch(e => {
+        res.status(400);
+        res.json(errorHandler.createErrorResponse(e.message));
+        return;
+    });
+};
+
 exports.update = function(req, res) {
     // console.log('');
     logger.log('objectController.update', {type: 'function'});

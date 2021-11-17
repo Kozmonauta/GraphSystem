@@ -269,6 +269,20 @@ var objectQuery = {
         return query;
     },
     
+    findForEdge: function(destinationEdge) {
+        logger.log('objectQuery.findForEdge', {type: 'function'});
+
+        let fieldName = '_' + (destinationEdge.direction === 'in' ? 'i' : 'o') + '_' + destinationEdge.type;
+        let query = 'MATCH (n) WHERE ';
+        
+        query += 'n.' + fieldName + '=-1 OR ' + 'n.' + fieldName + '>0 ';
+        query += 'return n;';
+        
+        console.log('query', query);
+        
+        return query;
+    },
+    
     update: function(oldObjectData, objectData, classData) {
         logger.log('objectQuery.update', {type: 'function'});
 
@@ -646,90 +660,6 @@ console.log('c',c);
             query += 'ID(n) AS id';
         }
         
-        logger.log(query, {name: 'query'});
-
-        return query;
-    },
-    
-    // Search for objects, filter by edge
-    // 
-    // Available parameters:
-    // ed: edgeDirection *
-    // el: edgeLabel *
-    // nci: nodeClassId
-    // ncl: nodeClassLabel
-    // cci: connectedNodeClassId
-    findForEdge: function(params) {
-        logger.log('objectQuery.findForEdge', {type: 'function'});
-        logger.log(params, {name: 'params'});
-        
-        var query = '';
-        var classData = params.classData;
-        var ed = params.ed;
-        var el = params.el;
-        var nci = params.nci;
-        var ncl = params.ncl;
-        var cci = params.cci;
-        var nes;
-        var ces;
-        var nameField;
-
-        nes = ed === 'out' ? '_oes' : '_ies';
-        ces = ed === 'out' ? '_ies' : '_oes';
-        
-        // If class has "name" field then return that, else return first text field
-        if (classData === undefined || (classData.fields.name !== undefined && classData.fields.name.type === 'text')) {
-            nameField = 'name';
-        } else {
-            for (var fk in classData.fields) {
-                var field = classData.fields[fk];
-                
-                if (field.type === 'text') {
-                    nameField = fk;
-                    break;
-                }
-            }
-        }
-        
-        if (nci !== undefined && ncl !== undefined && cci !== undefined) {
-            query += 'MATCH (n:' + ncl + ') WHERE ';
-            query += 'n._classId = ' + nci + ' AND ';
-            query += '("' + el + '" IN n.' + nes + ' OR ';
-            query += '"' + el + '.' + cci + '" IN n.' + nes + ') ';
-            query += 'RETURN ';
-            query += 'ID(n) AS id, n.' + nameField + ' AS ' + nameField + ';';
-        } else 
-            
-        if (ncl !== undefined && cci !== undefined && nci === undefined) {
-            query += 'MATCH (n:' + ncl + ') WHERE ';
-            query += '("' + el + '" IN n.' + nes + ' OR ';
-            query += '"' + el + '.' + cci + '" IN n.' + nes + ') ';
-            query += 'RETURN ';
-            query += 'ID(n) AS id, n.' + nameField + ' AS ' + nameField + ';';
-        } else 
-            
-        if (cci !== undefined && nci === undefined && ncl === undefined) {
-            query += 'MATCH (n) WHERE ';
-            query += '("' + el + '" IN n.' + nes + ' OR ';
-            query += '"' + el + '.' + cci + '" IN n.' + nes + ') ';
-            query += 'RETURN ';
-            query += 'ID(n) AS id, n.' + nameField + ' AS ' + nameField + ';';
-        } else
-            
-        if (cci === undefined && nci === undefined && ncl === undefined) {
-            query += 'MATCH (n) WHERE ';
-            query += '"' + el + '" IN n.' + nes + ' ';
-            query += 'RETURN ';
-            query += 'ID(n) AS id, n.' + nameField + ' AS ' + nameField + ';';
-        // } else
-            
-        // if (ncl !== undefined && cci === undefined && nci === undefined) {
-            // query += 'MATCH (n:' + ncl + ') WHERE ';
-            // query += '"' + el + '" IN n.' + nes + ' ';
-            // query += 'RETURN ';
-            // query += 'ID(n) AS id, n.' + nameField + ' AS ' + nameField + ';';
-        }
-            
         logger.log(query, {name: 'query'});
 
         return query;

@@ -14,6 +14,10 @@ module.exports = function(app) {
         .post(controller.create)
     ;
 
+    app.route('/object-edges')
+        .get(controller.findForEdge)
+    ;
+
     app.route('/objects/:id')
         .get(controller.get)
         .put(controller.update)

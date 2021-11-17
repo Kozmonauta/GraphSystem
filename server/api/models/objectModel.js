@@ -125,6 +125,49 @@ var objectModel = {
         }
     },
     
+    findForEdge: async function(destinationEdge) {
+        logger.log('objectModel.findForEdge', {type: 'function'});
+
+        const query = objectQuery.findForEdge(destinationEdge);
+        const neo4jSession = neo4jDriver.session();
+        const txc = neo4jSession.beginTransaction();
+
+        try {
+            const resultRaw = await txc.run(query);
+            let result = neo4jUtils.formatRecords(resultRaw.records, {singleRecord: true});
+            
+            for (let i=0; i<result.length; i++) {
+                const r = result[i];
+                let node = {
+                    labels: r.labels,
+                    id: r.id
+                };
+                
+                if (r.fields.name !== undefined) node.name = r.fields.name;
+                if (r.fields['class'] !== undefined) node['class'] = r.fields['class'];
+                
+                for (let fk in r.fields) {
+                    if (fk.substr(0,1) === '_' && fk.substr(2,1) === '_' && fk.substr(3) === destinationEdge.type) {
+                        let d = fk.substr(1,1);
+                        if (d === 'i' && destinationEdge.direction === 'in') {
+                            node.availableEdgeNumber = r.fields[fk];
+                        }
+                    }                        
+                }
+                
+                result[i] = node;
+            }
+                
+            await txc.commit();
+            return result;
+        } catch (e) {
+            await txc.rollback();
+            throw e;
+        } finally {
+            await neo4jSession.close();
+        }
+    },
+    
     update: function(oldObjectData, objectData, classData, success, error) {
         logger.log('objectModel.update', {type: 'function'});
         
@@ -263,41 +306,6 @@ var objectModel = {
                     list.push(item);
                 },
                 onCompleted: function () {
-                    neo4jSession.close();
-                    if (errors === undefined) {
-                        success(list);
-                    } else {
-                        error(errors);
-                    }
-                },
-                onError: function (err) {
-                    errors = err;
-                }
-            })
-        ;
-    },
-    
-    findForEdge: function(params, success, error) {
-        logger.log('objectModel.findForEdge', {type: 'function'});
-        var query = objectQuery.findForEdge(params);
-        var list = [];
-        var neo4jSession = neo4jDriver.session();
-        var errors;
-        
-        neo4jSession
-            .run(query)
-            .subscribe({
-                onNext: function (data) {
-                    var item = {
-                        id: data._fields[0].low,
-                        name: data._fields[1],
-                        _actions: 'rud'
-                    };
-                    
-                    list.push(item);
-                },
-                onCompleted: function () {
-                    console.log('List data', list);
                     neo4jSession.close();
                     if (errors === undefined) {
                         success(list);
