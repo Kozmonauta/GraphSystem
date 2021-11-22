@@ -52,8 +52,8 @@ exports.create = function(req, res) {
     });
 };
 
-exports.findForEdge = function(req, res) {
-    logger.log('objectController.findForEdge', {type: 'function'});
+exports.findByEdge = function(req, res) {
+    logger.log('objectController.findByEdge', {type: 'function'});
     
     console.log('request:', req.query);
     // TODO request validation
@@ -63,11 +63,11 @@ exports.findForEdge = function(req, res) {
         direction: req.query.d
     };
     
-    objectModel.findForEdge(destinationEdge)
-    .then(findForEdgeResult => {
-        console.log('result:', utils.showJSON(findForEdgeResult));
+    objectModel.findByEdge(destinationEdge)
+    .then(findByEdgeResult => {
+        console.log('result:', utils.showJSON(findByEdgeResult));
         res.status(200);
-        res.json(findForEdgeResult);
+        res.json(findByEdgeResult);
         return;
     })
     .catch(e => {

@@ -15,7 +15,7 @@ module.exports = function(app) {
     ;
 
     app.route('/object-edges')
-        .get(controller.findForEdge)
+        .get(controller.findByEdge)
     ;
 
     app.route('/objects/:id')

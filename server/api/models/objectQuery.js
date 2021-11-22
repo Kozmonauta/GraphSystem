@@ -45,40 +45,59 @@ var objectQuery = {
                             if (nnk === mainNodeData.key) {
                                 // store class reference in main node
                                 objectFieldsString += 'class:"' + c.id + '",';
+                                // edge type + edge direction
+                                let edgeMarks = {};
                                 
                                 // store available class info in main node
                                 for (let mek in c.edges) {
                                     let me = c.edges[mek];
                                     if (o.edges[mek] === undefined && (me.source === undefined || me.target === undefined)) {
-                                        let acs = '_';
                                         let acNodeKey;
+                                        let direction;
+                                        let edgeMarkKey;
                                         
                                         if (me.source === undefined) {
-                                            acs += 'i';
+                                            direction = 'i';
                                             if (me.target !== nnk) {
                                                 acNodeKey = me.target;
                                             }
                                         } else
                                         if (me.target === undefined) {
-                                            acs += 'o';
+                                            direction = 'o';
                                             if (me.source !== nnk) {
                                                 acNodeKey = me.source;
                                             }
                                         }
                                         
-                                        acs += '_' + me.type;
-                                        objectFieldsString += acs + ':';
+                                        edgeMarkKey = '_' + direction + '_' + me.type;
                                         
                                         if (me.multiple === true) {
-                                            objectFieldsString += '-1,';
+                                            edgeMarks[edgeMarkKey] = -1;
                                         } else {
-                                            objectFieldsString += '1,';
+                                            if (edgeMarks[edgeMarkKey] === undefined) {
+                                                edgeMarks[edgeMarkKey] = 1;
+                                            } else
+                                            if (edgeMarks[edgeMarkKey] > 0) {
+                                                edgeMarks[edgeMarkKey]++;
+                                            }
                                         }
                                         
                                         if (acNodeKey !== undefined) {
-                                            mainNodeData.relatedNodes[acs] = acNodeKey;
+                                            // console.log('add acNodeKey', edgeMarkKey, acNodeKey);
+                                            if (mainNodeData.subEdges[edgeMarkKey] === undefined) {
+                                                mainNodeData.subEdges[edgeMarkKey] = {};
+                                            }
+                                            
+                                            mainNodeData.subEdges[edgeMarkKey][mek] = {
+                                                nodeKey: acNodeKey,
+                                                nodeName: c.nodes[acNodeKey].name
+                                            };
                                         }
                                     }
+                                }
+                                
+                                for (let ek in edgeMarks) {
+                                    objectFieldsString += ek + ':' + edgeMarks[ek] + ',';
                                 }
                             }                       
                             
@@ -129,8 +148,9 @@ var objectQuery = {
         let eni = 0;
         let nodeAlias;
         let mainNodeData = {
-            relatedNodes: {}
-        };        
+            // edges which are connected to external nodes but not from the main node
+            subEdges: {}
+        };
         console.log('destNonMainNodes', destNonMainNodes);
         for (let ek in o.edges) {
             let e = o.edges[ek];
@@ -180,14 +200,24 @@ var objectQuery = {
             query += cefnResult.query;
         }
         
-        console.log('mainNodeData', mainNodeData);
-        if (Object.keys(mainNodeData.relatedNodes).length > 0) {
+        // console.log('mainNodeData', mainNodeData);
+        
+        // set additional non-main node connection info to main node
+        if (Object.keys(mainNodeData.subEdges).length > 0) {
             query += 'SET ';
-            for (let nk in mainNodeData.relatedNodes) {
-                let nk1 = nk.substring(0, 2);
-                let nk2 = nk.substring(2);
+            for (let nk in mainNodeData.subEdges) {
+                const nk1 = nk.substring(0, 2);
+                const nk2 = nk.substring(2);
+                const edgeMapperFieldName = mainNodeData.key + '.' + nk1 + 'e' + nk2;
+                let subEdgeKeys = [];
                 
-                query += mainNodeData.key + '.' + nk1 + 'i' + nk2 + '=' + mainNodeData.relatedNodes[nk] + '.id,';
+                for (let sek in mainNodeData.subEdges[nk]) {
+                    subEdgeKeys.push(sek);
+                    query += mainNodeData.key + '._ni_' + sek + '=' + mainNodeData.subEdges[nk][sek].nodeKey + '.id,';
+                    query += mainNodeData.key + '._nn_' + sek + '="' + mainNodeData.subEdges[nk][sek].nodeName + '",';
+                }
+                
+                query += edgeMapperFieldName + '=' + utils.formatField(subEdgeKeys) + ',';
             }
             query = query.substring(0, query.length - 1) + ' ';
         }
@@ -269,8 +299,8 @@ var objectQuery = {
         return query;
     },
     
-    findForEdge: function(destinationEdge) {
-        logger.log('objectQuery.findForEdge', {type: 'function'});
+    findByEdge: function(destinationEdge) {
+        logger.log('objectQuery.findByEdge', {type: 'function'});
 
         let fieldName = '_' + (destinationEdge.direction === 'in' ? 'i' : 'o') + '_' + destinationEdge.type;
         let query = 'MATCH (n) WHERE ';

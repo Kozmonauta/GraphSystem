@@ -1,0 +1,45 @@
+1. get connectable nodes
+[
+    {
+        "labels": [
+            "B"
+        ],
+        "id": "590577d8-2e9e-4aef-b5d6-8b5cfb4e7311",
+        "name": "Paca B (main)",
+        "subEdges": {
+            "c_e1":"C class node neve",
+            "d_e1":"D class node neve"
+        }
+    }
+]
+
+2. create node, connected to node "Paca B (main)"
+...
+    "edges": {
+        ...
+        "a": {
+            "target": "590577d8-2e9e-4aef-b5d6-8b5cfb4e7311",
+            "subEdge": "d_e1"
+        },
+        ...
+    }
+...
+
+3. connect to node "Paca B (main)"
+
+what "Paca B (main)" has:
+_i_C:-1
+_i_DIKK:1
+_i_OF:1
+_ni_c_e1:bf4db26f-8013-49f8-b0bc-ddb32cbdb4ab
+_ni_d_e1:20deeb4e-950b-42cb-9366-63fefc79965c
+_ni_d_e2:20deeb4e-950b-42cb-9366-63fefc79965c
+_ni_f_e:f8192bc2-ea54-4886-ae8a-8eb89cb6b2a6
+_ni_g_e:9836c5c2-3b99-4a1f-a042-98bd6df514f8
+_o_DIKK:2
+_o_H:-1
+_o_OG:1
+class:d5116f3f-0616-4b68-a6d8-05d96d613143
+id:31668a1f-c4cc-4321-8248-f29bf61cdd3b
+name:Paca B (main)
+_ie_DIKK:[]

@@ -125,10 +125,10 @@ var objectModel = {
         }
     },
     
-    findForEdge: async function(destinationEdge) {
-        logger.log('objectModel.findForEdge', {type: 'function'});
+    findByEdge: async function(destinationEdge) {
+        logger.log('objectModel.findByEdge', {type: 'function'});
 
-        const query = objectQuery.findForEdge(destinationEdge);
+        const query = objectQuery.findByEdge(destinationEdge);
         const neo4jSession = neo4jDriver.session();
         const txc = neo4jSession.beginTransaction();
 
@@ -138,22 +138,40 @@ var objectModel = {
             
             for (let i=0; i<result.length; i++) {
                 const r = result[i];
+                
+                let subEdges = {};
                 let node = {
                     labels: r.labels,
                     id: r.id
                 };
+
                 
                 if (r.fields.name !== undefined) node.name = r.fields.name;
-                if (r.fields['class'] !== undefined) node['class'] = r.fields['class'];
                 
                 for (let fk in r.fields) {
+                    // find field keys like "_i_EDGETYPE"
                     if (fk.substr(0,1) === '_' && fk.substr(2,1) === '_' && fk.substr(3) === destinationEdge.type) {
-                        let d = fk.substr(1,1);
-                        if (d === 'i' && destinationEdge.direction === 'in') {
+                        const d = fk.substr(1,1);
+                        if ((d === 'i' && destinationEdge.direction === 'in') || (d === 'o' && destinationEdge.direction === 'out')) {
                             node.availableEdgeNumber = r.fields[fk];
+                        }
+                    } else
+                    
+                    if (fk.substr(0,1) === '_' && fk.substr(2,2) === 'e_' && fk.substr(4) === destinationEdge.type) {
+                        const d = fk.substr(1,1);
+                        if ((d === 'i' && destinationEdge.direction === 'in') || (d === 'o' && destinationEdge.direction === 'out')) {
+                            let edgeKeys = r.fields[fk];
+                            
+                            for (let j=0; j<edgeKeys.length; j++) {
+                                const ek = edgeKeys[j];
+                                const nnField = '_nn_' + ek;
+                                subEdges[ek] = r.fields[nnField];
+                            }
                         }
                     }                        
                 }
+                
+                if (Object.keys(subEdges).length > 0) node.subEdges = subEdges;
                 
                 result[i] = node;
             }
