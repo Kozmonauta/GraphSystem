@@ -6,7 +6,7 @@ var neo4jUtils = require('../neo4jUtils');
 
 var objectModel = {
 
-    // Collect the nodes and their required available edge fields so they can be connected to the actual object
+    // Collect the nodes (main nodes of objects) and their required available edge fields so they can be connected to the actual object
     getNodesToCheck: function(objectData, classData) {
         let nodesToCheck = {};
         let i = 0;
@@ -33,10 +33,16 @@ var objectModel = {
                 };
             }
             
-            nodesToCheck[i].edges.push({
+            let newEdge = {
                 type: type,
                 direction: direction
-            });
+            };
+            
+            if (objectData.edges[ek].subEdge !== undefined) {
+                newEdge.subEdge = objectData.edges[ek].subEdge;
+            }
+            
+            nodesToCheck[i].edges.push(newEdge);
         }
         // console.log('nodesToCheck', utils.showJSON(nodesToCheck));
 
@@ -71,7 +77,6 @@ var objectModel = {
         
         const nodesToCheck = this.getNodesToCheck(objectData, classData);
         const caeQuery = objectQuery.checkAvailableEdges(nodesToCheck);
-        // return;
         const neo4jSession = neo4jDriver.session();
         const txc = neo4jSession.beginTransaction();
 
@@ -84,8 +89,9 @@ var objectModel = {
             }
             
             const caeResult = neo4jUtils.formatRecord(caeResultRaw.records[0]);
-            console.log('caeResult', caeResult);
-            let destNonMainNodes = {};
+            console.log('caeResult', utils.showJSON(caeResult));
+
+            let connectedSubNodes = {};
             for (let fk in caeResult) {
                 let fkFieldName = fk.substring(fk.indexOf('.') + 1);
                 // fields like this: _o_H
@@ -95,12 +101,13 @@ var objectModel = {
                     }
                 } else
                 // fields like this: _oi_H where o=outgoing, i=id
-                if (fkFieldName.charAt(3) === '_' && fkFieldName.charAt(2) === 'i') {
+                if (fkFieldName.substring(0,4) === '_ni_') {
                     if (caeResult[fk] !== null) {
-                        destNonMainNodes[fk] = caeResult[fk];
+                        connectedSubNodes[fkFieldName.substring(4)] = { id: caeResult[fk] };
                     }
                 }
             }
+            console.log('connectedSubNodes', utils.showJSON(connectedSubNodes));
             
             const nodesToUpdate = this.getNodesToUpdate(nodesToCheck, caeResult);
             
@@ -110,7 +117,7 @@ var objectModel = {
                 const uaeResult = await txc.run(uaeQuery);
             }
             
-            const createQuery = objectQuery.create(objectData, classData, destNonMainNodes);
+            const createQuery = objectQuery.create(objectData, classData, connectedSubNodes);
             const createResult = await txc.run(createQuery);
             const result = neo4jUtils.formatRecord(createResult.records[0], {singleRecord: true});
             // console.log('txc return', result);
