@@ -356,31 +356,20 @@ var utils = {
         return r;
     },
     
-    inheritData(oneData, allData) {
-        if (oneData['extends'] === undefined) {
-            return oneData;
-        } else 
-        if (Array.isArray(oneData['extends'])) {
-            for (ek=0;ek<oneData['extends'].length;ek++) {
-            }
-            return;
-        }
-        
-        var allDataKeys = Object.keys(allData);
-        var dataDone = [];
-        var parentKey = oneData['extends'];
-
-        for (ak in allData) {
-            var pak = '$' + ak;
-            if (pak === parentKey) {
+    // merge ancestor into o
+    inherit(o, ancestor) {
+        for (let k in ancestor) {
+            let a = ancestor[k];
+            
+            if (o[k] === undefined) o[k] = a;
+            
+            if (typeof a === 'object') {
+                o[k] = this.inherit(o[k], a);
+            } else 
+            if (typeof a === 'object') {
+            } else {
             }
         }
-        
-        var ak = allDataKeys[0];
-        while (allData[ak]['extends'] !== undefined) {
-        }
-        
-        
     }
     
 }

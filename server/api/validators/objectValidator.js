@@ -109,6 +109,16 @@ exports.createObjectWithClassCheck = function(o, c) {
     return res;
 };
 
+exports.getRequestCheck = function(params, query) {
+    var res = [];
+    
+    if (params === undefined || params.id === undefined) {
+        res.push({type: 'error', message: 'Object id is required'});
+    }
+    
+    return res;
+};
+
 exports.create = function(o, c, res, options) {
     
     

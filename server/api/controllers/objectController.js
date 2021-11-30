@@ -3,6 +3,7 @@
 var classModel = require('../models/classModel');
 var objectModel = require('../models/objectModel');
 var objectValidator = require('../validators/objectValidator');
+var classValidator = require('../validators/classValidator');
 var eventService = require('../services/eventService');
 var objectService = require('../services/objectService');
 var classService = require('../services/classService');
@@ -26,6 +27,14 @@ exports.create = function(req, res) {
     
     classModel.get(o['class'])
     .then(getClassResult => {
+        const extendedClassCheckResult = classValidator.createExtendedCheck(getClassResult);
+
+        if (!errorHandler.isValid(extendedClassCheckResult)) {
+            res.status(400);
+            res.json(extendedClassCheckResult);
+            return;
+        }
+
         const objectWithClassResult = objectValidator.createObjectWithClassCheck(o, getClassResult);
         
         if (!errorHandler.isValid(objectWithClassResult)) {
@@ -77,161 +86,51 @@ exports.findByEdge = function(req, res) {
     });
 };
 
-exports.update = function(req, res) {
-    // console.log('');
-    logger.log('objectController.update', {type: 'function'});
-    // logger.log(req.body, {name: 'req.body'});
-
-    var returned = false;
-    var pid = req.headers.pid;
-    var objectId = req.params.id;
-    var objectData = req.body;
-    var classId = objectData.classId;
-    var validationResult = { items: [], valid: true };
-    
-    objectValidator.hasClass(validationResult, objectData);
-    
-    if (validationResult.valid === false) {
-        res.status(400);
-        res.json(validationResult);
-        return;
-    }
-    
-    // get object's class
-    classModel.get({id:classId}, {'mode':'inherited'},
-        function(classData) {
-            objectValidator.checkRequired(validationResult, objectData, classData);
-
-            if (validationResult.valid === false) {
-                if (returned === true) return;
-                
-                console.log('400 0????????', validationResult);
-                res.status(400);
-                res.json(validationResult);
-                returned = true;
-                
-                return;
-            }
-            
-            var externalClassIds = classService.getExternalClassIds(classData);
-            
-            classModel.getLabels(externalClassIds, 
-                function(lRes) {
-                    classService.fillExternalClassLabels(classData, lRes);
-                    
-                    var ioes = classService.collectEdgeConnections(classData);
-                    objectData._ies = ioes._ies;
-                    objectData._oes = ioes._oes;
-
-                    var getObjectParams = {
-                        'class': classData,
-                        id: objectId
-                    };
-                    
-                    objectModel.get(getObjectParams, 
-                        function(rRes) {
-                            objectModel.update(rRes, objectData, classData, 
-                                function(rData) {
-                                    if (returned === true) return;
-                                    
-                                    console.log('200 1????????');
-                                    res.status(200);
-                                    res.json({'message':rData});
-                                    returned = true;
-                                },
-                                function(rErr) {
-                                    if (returned === true) return;
-                                    
-                                    console.log('400 1????????');
-                                    res.status(400);
-                                    res.json({'error':'db error'});
-                                    returned = true;
-                                }
-                            );
-                        },
-                        function(rErr) {
-                            if (returned === true) return;
-                                
-                            console.log('400 2????????');
-                            res.status(400);
-                            res.json({'error':'db error'});        
-                            
-                            returned = true;
-                        }
-                    );
-                },
-                function(rErr) {
-                    if (returned === true) return;
-                    
-                    res.status(400);
-                    res.json({'error':'db error'});
-                    
-                    returned = true;
-                }
-            );
-
-
-
-            // var objectValidationResult = objectValidator.update(utils.formToObject(objectData, classData), classData);
-            // var objectValidationResult = objectValidator.save(objectData, classData);
-            // console.log('objectValidationResult', objectValidationResult);
-            // if (objectValidationResult.valid === false) {
-                // res.status(400).json(objectValidationResult);
-                // return;
-            // }
-        },
-        function(rErr) {
-            if (returned === true) return;
-
-            console.log('400 3????????');
-            res.status(400);
-            res.json({'error':'db error'});
-            
-            returned = true;
-        }
-    );
-};
-
 exports.get = function(req, res) {
     logger.log('objectController.get', {type: 'function'});
     console.log('req.params', req.params);
     console.log('req.query', req.query);
     
-    var returned = false;
-    var objectId = req.params.id;
-    var classId = req.query.classId;
-    var options = {
-        mode: req.query.mode === undefined ? 'simple' : req.query.mode
-    };
+    const pid = req.headers.pid;
+    const grcResult = objectValidator.getRequestCheck(req.params, req.query);
     
-    classModel.get({id: classId}, options, 
-        function(rRes) {
-            var classData = rRes;
-                    
-            var params = {
-                'class': classData,
-                id: objectId
-            };
-                    
-            objectModel.get(params, 
-                function(oRes) {
-                    res.status(200);
-                    res.json(oRes);
-                    returned = true;
-                },
-                function(rErr) {
-                    res.status(400);
-                    res.json({'error':'db error'});        
-                    returned = true;
-                }
-            );
-        },
-        function(rErr) {
+    if (!errorHandler.isValid(grcResult)) {
+        res.status(400);
+        res.json(grcResult);
+        return;
+    }
+    
+    let params = { objectID: req.params.id };
+    
+    if (req.query.label !== undefined) {
+        params.objectLabel = req.query.label;
+    }
+    
+    classModel.getForObject(params)
+    .then(getClassResult => {
+        objectModel.get(params, getClassResult)
+        .then(getObjectResult => {
+            getObjectResult['class'] = getClassResult.id;
+
+            res.status(200);
+            res.json(getObjectResult);
+        })
+        .catch(e => {
             res.status(400);
-            res.json({'error':'db error'});        
-        }
-    );
+            res.json(errorHandler.createErrorResponse(e.message));
+            return;
+        });
+    })
+    .catch(e => {
+        res.status(400);
+        res.json(errorHandler.createErrorResponse(e.message));
+        return;
+    });
 };
+
+// ==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--
+// ==-- OLD PART --==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--
+// ==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--
 
 exports.updateFields = function(req, res) {
     logger.log('objectController.updateFields', {type: 'function'});

@@ -208,15 +208,48 @@ var classQuery = {
         switch (options.mode) {
             // Just the node
             case 'simple':
+                // TODO handle return format and multiple ids
                 query += 'MATCH (n:Class) WHERE n.id="' + filter.id + '" ';
-                query += 'RETURN n AS c';
+                query += 'RETURN n AS c;';
                 break;
             // Node with inherited values
             case 'inherited':
-                query += 'MATCH (n:Class) WHERE n.id="' + filter.id + '" ';
-                query += 'RETURN dn.collectInheritData(n.id,"Class","E","out",null) AS c';
+                if (filter.id !== undefined) {
+                    query += 'MATCH (n:Class) WHERE n.id="' + filter.id + '" ';
+                    query += 'RETURN dn.collectInheritData(n.id,"Class","E","out",null);';
+                } else
+                if (filter.ids !== undefined) {
+                    for (let i=0; i<filter.ids.length; i++) {
+                        const nodeAlias = 'n' + i;
+                        query += 'MATCH (' + nodeAlias + ':Class) WHERE ' + nodeAlias + '.id="' + filter.ids[i] + '" ';
+                    }
+                    query += 'RETURN ';
+                    for (let i=0; i<filter.ids.length; i++) {
+                        const nodeAlias = 'n' + i;
+                        query += 'dn.collectInheritData(' + nodeAlias + '.id,"Class","E","out",null),';
+                    }
+                    query = query.substring(0, query.length - 1) + ';';
+                }
                 break;
         }
+        console.log('query', query);
+
+        return query;
+    },
+
+    getForObject: function(params) {
+        logger.log('classQuery.getForObject', {type: 'function'});
+        var query = '';
+        console.log('params', params);
+        
+        if (params.objectLabel !== undefined) {
+            query += 'MATCH (o:' + params.objectLabel + ') WHERE o.id="' + params.objectID + '" ';
+        } else {
+            query += 'MATCH (o) WHERE o.id="' + params.objectID + '" ';
+        }
+        query += 'MATCH (c:Class) WHERE c.id=o.class ';
+        query += 'RETURN dn.collectInheritData(c.id,"Class","E","out",null) AS c;';
+        
         console.log('query', query);
 
         return query;

@@ -12,13 +12,13 @@ exports.create = function(req, res) {
     
     var c = req.body;
     console.log('c', c);
-    var cResult = classValidator.create(c);
+    // var cResult = classValidator.create(c);
     
-    if (!errorHandler.isValid(cResult)) {
-        res.status(400);
-        res.json(cResult);
-        return;
-    }
+    // if (!errorHandler.isValid(cResult)) {
+        // res.status(400);
+        // res.json(cResult);
+        // return;
+    // }
     
     classModel.create(c)
     .then(createClassResult => {
@@ -31,11 +31,11 @@ exports.create = function(req, res) {
         }
 
         res.status(200);
-        res.json(createClassResult);            
+        res.json(createClassResult);
     })
     .catch(e => {
         res.status(400);
-        res.json(errorHandler.createErrorResponse(e.message));
+        res.json(e);
     });
 };
 

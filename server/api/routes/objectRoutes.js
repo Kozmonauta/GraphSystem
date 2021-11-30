@@ -10,7 +10,7 @@ module.exports = function(app) {
     // ;
 
     app.route('/objects')
-        .get(controller.findByQuery)
+        // .get(controller.findByQuery)
         .post(controller.create)
     ;
 
@@ -20,17 +20,17 @@ module.exports = function(app) {
 
     app.route('/objects/:id')
         .get(controller.get)
-        .put(controller.update)
-        .patch(controller.updateFields)
-        .delete(controller.delete)
+        // .put(controller.update)
+        // .patch(controller.updateFields)
+        // .delete(controller.delete)
     ;
     
     app.route('/objects/import')
-        .post(controller.import)
+        // .post(controller.import)
     ;
     
     app.route('/object-list')
-        .post(controller.find)
+        // .post(controller.find)
     ;
 
 };
