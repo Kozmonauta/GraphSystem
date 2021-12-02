@@ -71,15 +71,15 @@ var objectUtils = {
     // 
     formatGetResult: function(result) {
         let ret = {};
-        console.log('formatGetResult', result);
+        // console.log('formatGetResult', result);
         for (let rk in result) {
             let fus = rk.indexOf('_') + 1;
             let prefix = rk.substring(0, fus);
             let key = rk.substring(fus);
-            
+
             if (prefix === 'in_') {
                 if (ret.nodes === undefined) ret.nodes = {};
-                ret.nodes[key] = result[rk];
+                ret.nodes[key] = this.formatNodeFields(result[rk]);
             }
             
             if (prefix === 'e_') {
@@ -103,7 +103,7 @@ var objectUtils = {
             
             if (prefix === 'in_') {
                 if (ret.nodes === undefined) ret.nodes = {};
-                ret.nodes[key] = result[rk];
+                ret.nodes[key] = this.formatNodeFields(result[rk]);
             }
             
             if (prefix === 'e_') {
@@ -113,6 +113,31 @@ var objectUtils = {
         }
         
         return ret;
+    },
+    
+    formatNodeFields: function(n) {
+        if (n.fields['class'] !== undefined) {
+            n['class'] = n.fields['class'];
+            delete n.fields['class'];
+        }
+        
+        // delete ret.nodes[key].name;
+        
+        for (let fk in n.fields) {
+            const field2chars = fk.substring(0,2);
+            const field3chars = fk.substring(0,3);
+            
+            if (['_i', '_o'].includes(field2chars) || ['_ie', '_oe', '_nn', '_ni'].includes(field3chars)) {
+                delete n.fields[fk];
+            }
+            
+            if (field2chars === '_f') {
+                n.fields[fk.substring(3)] = n.fields[fk];
+                delete n.fields[fk];
+            }
+        }
+        
+        return n;
     }
     
 };

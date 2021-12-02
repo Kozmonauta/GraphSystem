@@ -39,16 +39,6 @@ var neo4jUtils = {
             }
         }
         
-        if (options.clearMetaData === true) {
-            for (let nk in res) {
-                for (let fk in res[nk].fields) {
-                    if (fk.substr(0,1) === '_') {
-                        delete res[nk].fields[fk];
-                    }
-                }
-            }
-        }
-        
         if (options.singleRecord === true) {
             res = res[record.keys[0]];
         }

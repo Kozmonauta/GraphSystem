@@ -240,15 +240,15 @@ var classQuery = {
     getForObject: function(params) {
         logger.log('classQuery.getForObject', {type: 'function'});
         var query = '';
-        console.log('params', params);
+        // console.log('params', params);
         
         if (params.objectLabel !== undefined) {
             query += 'MATCH (o:' + params.objectLabel + ') WHERE o.id="' + params.objectID + '" ';
         } else {
             query += 'MATCH (o) WHERE o.id="' + params.objectID + '" ';
         }
-        query += 'MATCH (c:Class) WHERE c.id=o.class ';
-        query += 'RETURN dn.collectInheritData(c.id,"Class","E","out",null) AS c;';
+        query += 'OPTIONAL MATCH (c:Class) WHERE c.id=o.class ';
+        query += 'RETURN o, dn.collectInheritData(c.id,"Class","E","out",null) AS c;';
         
         console.log('query', query);
 

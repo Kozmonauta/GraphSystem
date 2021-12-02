@@ -1,11 +1,11 @@
 'use strict';
 
-let objectCreateQuery = {
+let objectUpdateQuery = {
 
-    className: 'objectCreateQuery',
+    className: 'objectUpdateQuery',
     
-    create: function(o, c, connectedSubNodes) {
-        logger.log(this.className + '.create', {type: 'function'});
+    update: function(o, c, connectedSubNodes) {
+        logger.log(this.className + '.update', {type: 'function'});
         // TODO handle node key corruption
         let query = '';
 
@@ -118,7 +118,7 @@ let objectCreateQuery = {
         let query = '';
         let newNodes = {};
         let newEdges = [];
-        // console.log('nodes', nodes);
+        console.log('nodes', nodes);
         for (let nk in nodes) {
             const na = nodes[nk];
             
@@ -147,12 +147,8 @@ let objectCreateQuery = {
                         if (newNodes[nnk] === undefined) {
                             let objectFieldsString = '';
                             
-                            for (let fk in o.nodes[nnk].fields) {
-                                // TODO not necessary, just for show the node names in neo4j browser
-                                if (fk === 'name') {
-                                    objectFieldsString += fk + ':' + utils.formatField(o.nodes[nnk].fields[fk]) + ',';
-                                }
-                                objectFieldsString += '_f_' + fk + ':' + utils.formatField(o.nodes[nnk].fields[fk]) + ',';
+                            for (let fk in o.nodes[nnk]) {
+                                objectFieldsString += fk + ':' + utils.formatField(o.nodes[nnk][fk]) + ',';
                             }
 
                             if (nnk === mainNodeData.key) {
@@ -244,85 +240,8 @@ let objectCreateQuery = {
             nodes: newNodes,
             edges: newEdges
         }
-    },
-     
-    isNodeAliased: function(id, nodes) {
-        for (let nk in nodes) {
-            if (id === nodes[nk]) return true;
-        }
-        return false;
-    },
-    
-    checkAvailableEdges: function(nodes) {
-        logger.log(this.className + '.checkAvailableEdges', {type: 'function'});
-        let query = '';
-        
-        for (let nk in nodes) {
-            if (nodes[nk].label !== undefined) {
-                query += 'MATCH (n' + nk + ':' + nodes[nk].label + ') ';
-            } else {
-                query += 'MATCH (n' + nk + ') ';
-            }
-            query += 'WHERE n' + nk + '.id="' + nodes[nk].nodeID + '" '
-        }
-        
-        query += 'RETURN ';
-        
-        for (let nk in nodes) {
-            const node = nodes[nk];
-            for (let i=0; i<node.edges.length; i++) {
-                let edge = node.edges[i];
-                let nodePrefix = 'n' + nk + '.';
-                
-                if (edge.direction === 'out') {
-                    query += nodePrefix + '_o_' + edge.type + ',';
-                } else {
-                    query += nodePrefix + '_i_' + edge.type + ',';
-                }
-                
-                if (edge.subEdge !== undefined) {
-                    query += nodePrefix + '_ni_' + edge.subEdge + ',';
-                }
-            }
-        }
-        
-        query = query.substring(0, query.length - 1);
-        
-        // console.log('query', query);
-        return query;
-    },
-    
-    updateAvailableEdges: function(nodes) {
-        logger.log(this.className + '.updateAvailableEdges', {type: 'function'});
-
-        let query = '';
-        for (let nk in nodes) {
-            if (nodes[nk].label !== undefined) {
-                query += 'MATCH (n' + nk + ':' + nodes[nk].label + ') ';
-            } else {
-                query += 'MATCH (n' + nk + ') ';
-            }
-            query += 'WHERE n' + nk + '.id="' + nodes[nk].nodeID + '" '
-        }
-        
-        query += 'SET ';
-        
-        for (let nk in nodes) {
-            const node = nodes[nk];
-            for (let i=0; i<node.edges.length; i++) {
-                const fieldName = 'n' + nk + '.' + node.edges[i];
-                query += fieldName + '=' + fieldName + '-1,';
-            }
-        }
-        
-        query = query.substring(0, query.length - 1);
-        
-        query += ' RETURN true;';
-        
-        // console.log('query', query);
-        return query;
     }
     
 };
 
-module.exports = objectCreateQuery;
+module.exports = objectUpdateQuery;

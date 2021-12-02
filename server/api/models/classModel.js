@@ -147,12 +147,12 @@ var classModel = {
         
         try {
             const resultRaw = await txc.run(query);
-            
             if (resultRaw.records.length === 0) {
-                throw new Error('Class not found');
+                throw new Error('Object not found');
             }
             
-            const result = neo4jUtils.formatRecord(resultRaw.records[0], {singleRecord: true});
+            const result = neo4jUtils.formatRecord(resultRaw.records[0], {singleRecord: false});
+            // console.log('result', result);
             await txc.commit();
             return result;
         } catch (e) {

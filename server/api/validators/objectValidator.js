@@ -13,6 +13,40 @@ exports.createRequestCheck = function(o) {
         res.push({type: 'error', message: 'Class is required'});
     }
     
+    if (o.nodes === undefined || Object.keys(o.nodes).length === 0) {
+        res.push({type: 'error', message: 'Nodes is required'});
+        return res;
+    }
+    
+    for (let nk in o.nodes) {
+        const n = o.nodes[nk];
+        if (n.fields === undefined || Object.keys(n.fields).length === 0) {
+            res.push({type: 'error', message: 'Proeprty "fields" is required for node:' + nk});
+        }
+    }
+    
+    if (o.edges === undefined) {
+        res.push({type: 'error', message: 'Edges is required'});
+    }
+    
+    if (typeof o.nodes !== 'object') {
+        res.push({type: 'error', message: 'Nodes must be presented as an object'});
+    }
+    
+    if (typeof o.edges !== 'object') {
+        res.push({type: 'error', message: 'Edges must be presented as an object'});
+    }
+    
+    return res;
+};
+
+exports.updateRequestCheck = function(o) {
+    var res = [];
+    
+    if (o['class'] === undefined) {
+        res.push({type: 'error', message: 'Class is required'});
+    }
+    
     if (o.nodes === undefined) {
         res.push({type: 'error', message: 'Nodes is required'});
     }
@@ -53,13 +87,13 @@ exports.createObjectWithClassCheck = function(o, c) {
     
     // Check invalid node fields
     for (let nk in o.nodes) {
-        if (Object.keys(o.nodes[nk]).length > 0) {
-            if (c.nodes[nk].fields === undefined) {
+        if (Object.keys(o.nodes[nk].fields).length > 0) {
+            if (c.nodes[nk].fields === undefined || Object.keys(c.nodes[nk].fields).length === 0) {
                 res.push({type: 'error', message: 'Node [' + nk + '] must not have any fields'});
                 return res;
             }
             
-            for (let fk in o.nodes[nk]) {
+            for (let fk in o.nodes[nk].fields) {
                 if (c.nodes[nk].fields[fk] === undefined) {
                     res.push({type: 'error', message: 'Invalid field [' + fk + '] key for node [' + nk + ']'});
                     return res;

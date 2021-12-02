@@ -54,9 +54,10 @@ var objectModel = {
             
             const createQuery = objectCreateQuery.create(objectData, classData, connectedSubNodes);
             const createResultRaw = await txc.run(createQuery);
-            const createResult = neo4jUtils.formatRecord(createResultRaw.records[0], { clearMetaData: true });
+            const createResult = neo4jUtils.formatRecord(createResultRaw.records[0]);
+            // console.log('createResult', createResult);
             const createResultFormatted = objectUtils.formatCreateResult(createResult);
-            console.log('createResultFormatted', createResultFormatted);
+            // console.log('createResultFormatted', utils.showJSON(createResultFormatted));
             await txc.commit();
             return createResultFormatted;
         } catch (e) {
@@ -67,6 +68,30 @@ var objectModel = {
         }
     },
     
+    get: async function(params, c) {
+        logger.log('objectModel.get', {type: 'function'});
+
+        const query = objectReadQuery.get(params, c);
+        const neo4jSession = neo4jDriver.session();
+        const txc = neo4jSession.beginTransaction();
+
+        try {
+            const resultRaw = await txc.run(query);
+            let result = neo4jUtils.formatRecord(resultRaw.records[0]);
+            // console.log('result', result);
+            let resultFormatted = objectUtils.formatGetResult(result);
+            // console.log('resultFormatted', resultFormatted);
+            
+            await txc.commit();
+            return resultFormatted;
+        } catch (e) {
+            await txc.rollback();
+            throw e;
+        } finally {
+            await neo4jSession.close();
+        }
+    },
+        
     findByEdge: async function(destinationEdge) {
         logger.log('objectModel.findByEdge', {type: 'function'});
 
@@ -117,28 +142,6 @@ var objectModel = {
                 result[i] = node;
             }
                 
-            await txc.commit();
-            return result;
-        } catch (e) {
-            await txc.rollback();
-            throw e;
-        } finally {
-            await neo4jSession.close();
-        }
-    },
-    
-    get: async function(params, c) {
-        logger.log('objectModel.get', {type: 'function'});
-
-        const query = objectReadQuery.get(params, c);
-        const neo4jSession = neo4jDriver.session();
-        const txc = neo4jSession.beginTransaction();
-
-        try {
-            const resultRaw = await txc.run(query);
-            // console.log('resultRaw', utils.showJSON(resultRaw));
-            let result = objectUtils.formatGetResult(neo4jUtils.formatRecord(resultRaw.records[0], {clearMetaData: true}));
-            
             await txc.commit();
             return result;
         } catch (e) {
