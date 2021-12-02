@@ -227,10 +227,10 @@ let objectCreateQuery = {
                         }
                         
                         if (e.target === nk) {
-                            query += '-[:' + e.type + ']->(' + na + ') ';
+                            query += '-[:' + e.type + '{id:apoc.create.uuid()}]->(' + na + ') ';
                         } else 
                         if (e.source === nk) {
-                            query += '<-[:' + e.type + ']-(' + na + ') ';
+                            query += '<-[:' + e.type + '{id:apoc.create.uuid()}]-(' + na + ') ';
                         }
                     }
                     

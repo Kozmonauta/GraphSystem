@@ -85,8 +85,7 @@ exports.get = function(req, res) {
     .then(getClassResult => {
         objectModel.get(params, getClassResult.c)
         .then(getObjectResult => {
-            getObjectResult['class'] = getClassResult.id;
-
+            // getObjectResult['class'] = getClassResult.id;
             res.status(200);
             res.json(getObjectResult);
         })

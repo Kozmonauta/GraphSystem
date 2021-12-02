@@ -80,7 +80,7 @@ var objectModel = {
             let result = neo4jUtils.formatRecord(resultRaw.records[0]);
             // console.log('result', result);
             let resultFormatted = objectUtils.formatGetResult(result);
-            // console.log('resultFormatted', resultFormatted);
+            console.log('resultFormatted', resultFormatted);
             
             await txc.commit();
             return resultFormatted;

@@ -71,7 +71,7 @@ var objectUtils = {
     // 
     formatGetResult: function(result) {
         let ret = {};
-        // console.log('formatGetResult', result);
+        console.log('formatGetResult', result);
         for (let rk in result) {
             let fus = rk.indexOf('_') + 1;
             let prefix = rk.substring(0, fus);
@@ -80,15 +80,22 @@ var objectUtils = {
             if (prefix === 'in_') {
                 if (ret.nodes === undefined) ret.nodes = {};
                 ret.nodes[key] = this.formatNodeFields(result[rk]);
+                if (ret.nodes[key].fields['class'] !== undefined) {
+                    console.log('Classing');
+                    ret['class'] = ret.nodes[key].fields['class'];
+                    delete ret.nodes[key].fields['class'];
+                }
             }
             
             if (prefix === 'e_') {
                 if (ret.edges === undefined) ret.edges = {};
                 ret.edges[key] = result[rk];
+                delete ret.edges[key].type;
                 delete ret.edges[key].fields;
             }
         }
         
+                    // console.log('ret', ret);
         return ret;
     },
     
@@ -116,12 +123,12 @@ var objectUtils = {
     },
     
     formatNodeFields: function(n) {
-        if (n.fields['class'] !== undefined) {
-            n['class'] = n.fields['class'];
-            delete n.fields['class'];
-        }
+        // if (n.fields['class'] !== undefined) {
+            // n['class'] = n.fields['class'];
+            // delete n.fields['class'];
+        // }
         
-        // delete ret.nodes[key].name;
+        delete n.labels;
         
         for (let fk in n.fields) {
             const field2chars = fk.substring(0,2);
