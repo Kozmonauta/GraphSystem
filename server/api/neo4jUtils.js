@@ -61,12 +61,6 @@ var neo4jUtils = {
             
             if (pk === 'id') {
                 res['id'] = property;
-            } else 
-            if (pk === '_classId') {
-                res['classId'] = property;
-            } else 
-            if (['_creator', '_createdOn'].includes(pk)) {
-                res[pk] = property;
             } else {
                 // if field is Integer
                 if (property.low !== undefined) {
@@ -113,16 +107,33 @@ var neo4jUtils = {
         return i.low;
     },
     
-    // TODO implement function
-    findPath: function(c, n1Key, n2Key) {
-        let path = {};
-        // let pathFound = false;
-        // let edgesChecked = [];
+    // checks if path exists between n1Key and n2Key in an object
+    findPath: function(n1Key, n2Key, o, edgesChecked) {
+        if (edgesChecked === undefined) edgesChecked = [];
         
-        // while (edgesChecked.length < Object.keys(edges).length && pathFound === false) {
-        // }
+        for (let ek in o.edges) {
+            if (edgesChecked.includes(ek)) continue;
+            
+            const e = o.edges[e];
+            if (e.target === n1Key || e.source === n1Key) {
+                edgesChecked.push(ek);
+                if (e.target === n1Key) {
+                    if (e.source === n2Key) {
+                        return true;
+                    } else {
+                        return this.findPath(e.source, n2Key, o, edgesChecked);
+                    }
+                } else {
+                    if (e.target === n2Key) {
+                        return true;
+                    } else {
+                        return this.findPath(e.target, n2Key, o, edgesChecked);
+                    }
+                }
+            }
+        }
         
-        return path;
+        return false;
     }
     
 }

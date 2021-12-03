@@ -40,7 +40,6 @@ var objectUtils = {
             
             nodesToCheck[i].edges.push(newEdge);
         }
-        // console.log('nodesToCheck', utils.showJSON(nodesToCheck));
 
         return nodesToCheck;
     },
@@ -71,7 +70,7 @@ var objectUtils = {
     // 
     formatGetResult: function(result) {
         let ret = {};
-        console.log('formatGetResult', result);
+        // console.log('formatGetResult', result);
         for (let rk in result) {
             let fus = rk.indexOf('_') + 1;
             let prefix = rk.substring(0, fus);
@@ -81,7 +80,7 @@ var objectUtils = {
                 if (ret.nodes === undefined) ret.nodes = {};
                 ret.nodes[key] = this.formatNodeFields(result[rk]);
                 if (ret.nodes[key].fields['class'] !== undefined) {
-                    console.log('Classing');
+                    // console.log('Classing');
                     ret['class'] = ret.nodes[key].fields['class'];
                     delete ret.nodes[key].fields['class'];
                 }

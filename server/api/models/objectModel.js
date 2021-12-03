@@ -24,25 +24,24 @@ var objectModel = {
             }
             
             const caeResult = neo4jUtils.formatRecord(caeResultRaw.records[0]);
-            // console.log('caeResult', utils.showJSON(caeResult));
 
             let connectedSubNodes = {};
             for (let fk in caeResult) {
-                let fkFieldName = fk.substring(fk.indexOf('.') + 1);
-                // fields like this: _o_H
-                if (fkFieldName.charAt(2) === '_') {
+                const fieldName = fk.substring(fk.indexOf('.') + 1);
+                const fieldNamePrefix = fieldName.substring(0,3);
+                const fieldNameValue = fieldName.substring(3);
+                
+                if (fieldNamePrefix === 'oe_' || fieldNamePrefix === 'ie_') {
                     if (caeResult[fk] === null || caeResult[fk] === 0) {
                         throw new Error('No available connections');
                     }
                 } else
-                // fields like this: _oi_H where o=outgoing, i=id
-                if (fkFieldName.substring(0,4) === '_ni_') {
+                if (fieldNamePrefix === 'ni_') {
                     if (caeResult[fk] !== null) {
-                        connectedSubNodes[fkFieldName.substring(4)] = { id: caeResult[fk] };
+                        connectedSubNodes[fieldNameValue] = { id: caeResult[fk] };
                     }
                 }
             }
-            // console.log('connectedSubNodes', utils.showJSON(connectedSubNodes));
             
             const nodesToUpdate = objectUtils.getNodesToUpdate(nodesToCheck, caeResult);
             
@@ -80,7 +79,7 @@ var objectModel = {
             let result = neo4jUtils.formatRecord(resultRaw.records[0]);
             // console.log('result', result);
             let resultFormatted = objectUtils.formatGetResult(result);
-            console.log('resultFormatted', resultFormatted);
+            // console.log('resultFormatted', resultFormatted);
             
             await txc.commit();
             return resultFormatted;
@@ -102,7 +101,7 @@ var objectModel = {
         try {
             const resultRaw = await txc.run(query);
             let result = neo4jUtils.formatRecords(resultRaw.records, {singleRecord: true});
-            console.log('result', utils.showJSON(result));
+            // console.log('result', utils.showJSON(result));
             for (let i=0; i<result.length; i++) {
                 const r = result[i];
                 
@@ -118,8 +117,8 @@ var objectModel = {
                     const fieldPrefix = fk.substr(0,3);
                     const fieldType = fk.substr(3);
                     const edgeDirection = fieldPrefix.substr(0,1);
-                    console.log('fieldPrefix', fieldPrefix);
-                    console.log('fieldType', fieldType);
+                    // console.log('fieldPrefix', fieldPrefix);
+                    // console.log('fieldType', fieldType);
                     
                     if (fieldType === destinationEdge.type && 
                         ((edgeDirection === 'i' && destinationEdge.direction === 'in') || 
@@ -143,7 +142,7 @@ var objectModel = {
                 
                 if (Object.keys(subEdges).length > 0) node.subEdges = subEdges;
                 
-                console.log('node', utils.showJSON(node));
+                // console.log('node', utils.showJSON(node));
                 result[i] = node;
             }
                 

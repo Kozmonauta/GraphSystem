@@ -85,17 +85,17 @@ let objectCreateQuery = {
             query += cefnResult.query;
         }
         
-        console.log('mainNodeData', utils.showJSON(mainNodeData));
+        // console.log('mainNodeData', utils.showJSON(mainNodeData));
         // set additional non-main node connection info to main node
         if (Object.keys(mainNodeData.subEdges).length > 0) {
             query += 'SET ';
             for (let nk in mainNodeData.subEdges) {
                 const nk1 = nk.substring(0, 1);
                 const nk2 = nk.substring(2);
-                console.log('nk1', nk1);
-                console.log('nk2', nk2);
+                // console.log('nk1', nk1);
+                // console.log('nk2', nk2);
                 const edgeMapperFieldName = mainNodeData.alias + '.' + nk1 + 'n' + nk2;
-                console.log('edgeMapperFieldName', edgeMapperFieldName);
+                // console.log('edgeMapperFieldName', edgeMapperFieldName);
                 let subEdgeKeys = [];
                 
                 for (let sek in mainNodeData.subEdges[nk]) {
@@ -290,7 +290,7 @@ let objectCreateQuery = {
         
         query = query.substring(0, query.length - 1);
         
-        // console.log('query', query);
+        console.log('query', query);
         return query;
     },
     

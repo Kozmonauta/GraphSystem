@@ -9,32 +9,28 @@ var neo4jUtils = require('../neo4jUtils');
 exports.createRequestCheck = function(o) {
     var res = [];
     
+    // class must be referenced from object
     if (o['class'] === undefined) {
         res.push({type: 'error', message: 'Class is required'});
     }
     
-    if (o.nodes === undefined || Object.keys(o.nodes).length === 0) {
+    // an object must have >= 1 nodes
+    if (o.nodes === undefined || typeof o.nodes !== 'object' || Object.keys(o.nodes).length === 0) {
         res.push({type: 'error', message: 'Nodes is required'});
         return res;
     }
     
-    for (let nk in o.nodes) {
-        const n = o.nodes[nk];
-        if (n.fields === undefined || Object.keys(n.fields).length === 0) {
-            res.push({type: 'error', message: 'Proeprty "fields" is required for node:' + nk});
-        }
-    }
-    
-    if (o.edges === undefined) {
+    // an object must have >= 1 edges
+    if (o.edges === undefined || typeof o.edges !== 'object' || Object.keys(o.edges).length === 0) {
         res.push({type: 'error', message: 'Edges is required'});
     }
     
-    if (typeof o.nodes !== 'object') {
-        res.push({type: 'error', message: 'Nodes must be presented as an object'});
-    }
-    
-    if (typeof o.edges !== 'object') {
-        res.push({type: 'error', message: 'Edges must be presented as an object'});
+    // all nodes must have >= 1 fields
+    for (let nk in o.nodes) {
+        const n = o.nodes[nk];
+        if (n.fields === undefined || Object.keys(n.fields).length === 0) {
+            res.push({type: 'error', message: 'Defining "fields" is required for node:' + nk});
+        }
     }
     
     return res;

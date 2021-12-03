@@ -66,8 +66,8 @@ var objectReadQuery = {
         let query = '';
         let mainNodeKey;
         let mainNodeAlias;
-        console.log('params', params);
-        console.log('c', utils.showJSON(c));
+        // console.log('params', params);
+        // console.log('c', utils.showJSON(c));
 
         // Locate main node
         for (let ek in c.edges) {

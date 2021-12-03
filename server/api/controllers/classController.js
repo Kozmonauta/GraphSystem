@@ -8,7 +8,7 @@ var classValidator = require('../validators/classValidator');
 var errorHandler = require('../errorHandler');
 
 exports.create = function(req, res) {
-    logger.log('classController.create', {type: 'function'});
+    logger.log('classController.create', {type: 'controllerFunction'});
     
     var c = req.body;
     console.log('c', c);

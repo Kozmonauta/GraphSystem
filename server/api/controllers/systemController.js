@@ -11,7 +11,7 @@ var errorHandler = require('../errorHandler');
 
 // Creates the initial database: core node, default classes, default objects
 exports.create = function(req, res) {
-    logger.log('systemController.create', {type: 'function'});
+    logger.log('systemController.create', {type: 'controllerFunction'});
     
     const sccResult = systemValidator.systemConfigCheck(systemConfig);
     if (!errorHandler.isValid(sccResult)) {

@@ -13,7 +13,7 @@ var fs = require('fs');
 const uuidv1 = require('uuid/v1');
 
 exports.create = function(req, res) {
-    logger.log('objectController.create', {type: 'function'});
+    logger.log('objectController.create', {type: 'controllerFunction'});
 
     const pid = req.headers.pid;
     const o = req.body;
@@ -62,7 +62,7 @@ exports.create = function(req, res) {
 };
 
 exports.get = function(req, res) {
-    logger.log('objectController.get', {type: 'function'});
+    logger.log('objectController.get', {type: 'controllerFunction'});
     console.log('req.params', req.params);
     console.log('req.query', req.query);
     
@@ -103,7 +103,7 @@ exports.get = function(req, res) {
 };
 
 exports.patch = function(req, res) {
-    logger.log('objectController.patch', {type: 'function'});
+    logger.log('objectController.patch', {type: 'controllerFunction'});
 
     const pid = req.headers.pid;
     const o = req.body;
@@ -158,7 +158,7 @@ exports.patch = function(req, res) {
 };
 
 exports.findByEdge = function(req, res) {
-    logger.log('objectController.findByEdge', {type: 'function'});
+    logger.log('objectController.findByEdge', {type: 'controllerFunction'});
     
     console.log('request:', req.query);
     // TODO request validation
