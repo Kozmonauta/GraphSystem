@@ -40,26 +40,14 @@ exports.createRequestCheck = function(o) {
     return res;
 };
 
-exports.updateRequestCheck = function(o) {
+exports.patchRequestCheck = function(o) {
     var res = [];
     
-    if (o['class'] === undefined) {
-        res.push({type: 'error', message: 'Class is required'});
-    }
-    
-    if (o.nodes === undefined) {
-        res.push({type: 'error', message: 'Nodes is required'});
-    }
-    
-    if (o.edges === undefined) {
-        res.push({type: 'error', message: 'Edges is required'});
-    }
-    
-    if (typeof o.nodes !== 'object') {
+    if (o.nodes !== undefined && typeof o.nodes !== 'object') {
         res.push({type: 'error', message: 'Nodes must be presented as an object'});
     }
     
-    if (typeof o.edges !== 'object') {
+    if (o.edges !== undefined && typeof o.edges !== 'object') {
         res.push({type: 'error', message: 'Edges must be presented as an object'});
     }
     

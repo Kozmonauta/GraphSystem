@@ -85,19 +85,23 @@ let objectCreateQuery = {
             query += cefnResult.query;
         }
         
+        console.log('mainNodeData', utils.showJSON(mainNodeData));
         // set additional non-main node connection info to main node
         if (Object.keys(mainNodeData.subEdges).length > 0) {
             query += 'SET ';
             for (let nk in mainNodeData.subEdges) {
-                const nk1 = nk.substring(0, 2);
+                const nk1 = nk.substring(0, 1);
                 const nk2 = nk.substring(2);
-                const edgeMapperFieldName = mainNodeData.alias + '.' + nk1 + 'e' + nk2;
+                console.log('nk1', nk1);
+                console.log('nk2', nk2);
+                const edgeMapperFieldName = mainNodeData.alias + '.' + nk1 + 'n' + nk2;
+                console.log('edgeMapperFieldName', edgeMapperFieldName);
                 let subEdgeKeys = [];
                 
                 for (let sek in mainNodeData.subEdges[nk]) {
                     subEdgeKeys.push(sek);
-                    query += mainNodeData.alias + '._ni_' + sek + '=' + mainNodeData.subEdges[nk][sek].nodeAlias + '.id,';
-                    query += mainNodeData.alias + '._nn_' + sek + '="' + mainNodeData.subEdges[nk][sek].nodeName + '",';
+                    query += mainNodeData.alias + '.ni_' + sek + '=' + mainNodeData.subEdges[nk][sek].nodeAlias + '.id,';
+                    query += mainNodeData.alias + '.nn_' + sek + '="' + mainNodeData.subEdges[nk][sek].nodeName + '",';
                 }
                 
                 query += edgeMapperFieldName + '=' + utils.formatField(subEdgeKeys) + ',';
@@ -152,7 +156,7 @@ let objectCreateQuery = {
                                 if (fk === 'name') {
                                     objectFieldsString += fk + ':' + utils.formatField(o.nodes[nnk].fields[fk]) + ',';
                                 }
-                                objectFieldsString += '_f_' + fk + ':' + utils.formatField(o.nodes[nnk].fields[fk]) + ',';
+                                objectFieldsString += 'nf_' + fk + ':' + utils.formatField(o.nodes[nnk].fields[fk]) + ',';
                             }
 
                             if (nnk === mainNodeData.key) {
@@ -170,19 +174,17 @@ let objectCreateQuery = {
                                         let edgeMarkKey;
                                         
                                         if (me.source === undefined) {
-                                            direction = 'i';
+                                            edgeMarkKey = 'ie_' + me.type;
                                             if (me.target !== nnk) {
                                                 acNodeKey = me.target;
                                             }
                                         } else
                                         if (me.target === undefined) {
-                                            direction = 'o';
+                                            edgeMarkKey = 'oe_' + me.type;
                                             if (me.source !== nnk) {
                                                 acNodeKey = me.source;
                                             }
                                         }
-                                        
-                                        edgeMarkKey = '_' + direction + '_' + me.type;
                                         
                                         if (me.multiple === true) {
                                             edgeMarks[edgeMarkKey] = -1;
@@ -275,13 +277,13 @@ let objectCreateQuery = {
                 let nodePrefix = 'n' + nk + '.';
                 
                 if (edge.direction === 'out') {
-                    query += nodePrefix + '_o_' + edge.type + ',';
+                    query += nodePrefix + 'oe_' + edge.type + ',';
                 } else {
-                    query += nodePrefix + '_i_' + edge.type + ',';
+                    query += nodePrefix + 'ie_' + edge.type + ',';
                 }
                 
                 if (edge.subEdge !== undefined) {
-                    query += nodePrefix + '_ni_' + edge.subEdge + ',';
+                    query += nodePrefix + 'ni_' + edge.subEdge + ',';
                 }
             }
         }

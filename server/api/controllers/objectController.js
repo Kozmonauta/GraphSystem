@@ -102,22 +102,28 @@ exports.get = function(req, res) {
     });
 };
 
-exports.update = function(req, res) {
-    logger.log('objectController.update', {type: 'function'});
+exports.patch = function(req, res) {
+    logger.log('objectController.patch', {type: 'function'});
 
     const pid = req.headers.pid;
     const o = req.body;
-    const urcResult = objectValidator.updateRequestCheck(o);
+    const prcResult = objectValidator.patchRequestCheck(o);
     
-    if (!errorHandler.isValid(urcResult)) {
+    if (!errorHandler.isValid(prcResult)) {
         res.status(400);
-        res.json(urcResult);
+        res.json(prcResult);
         return;
     }
     
-    classModel.getForObject(o['class'])
+    let params = { objectID: req.params.id };
+    
+    if (req.query.label !== undefined) {
+        params.objectLabel = req.query.label;
+    }
+    
+    classModel.getForObject(params)
     .then(getClassResult => {
-        const extendedClassCheckResult = classValidator.createExtendedCheck(getClassResult);
+        const extendedClassCheckResult = classValidator.createExtendedCheck(getClassResult.c);
 
         if (!errorHandler.isValid(extendedClassCheckResult)) {
             res.status(400);
@@ -164,7 +170,6 @@ exports.findByEdge = function(req, res) {
     
     objectModel.findByEdge(destinationEdge)
     .then(findByEdgeResult => {
-        console.log('result:', utils.showJSON(findByEdgeResult));
         res.status(200);
         res.json(findByEdgeResult);
         return;

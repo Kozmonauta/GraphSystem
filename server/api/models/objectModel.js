@@ -102,7 +102,7 @@ var objectModel = {
         try {
             const resultRaw = await txc.run(query);
             let result = neo4jUtils.formatRecords(resultRaw.records, {singleRecord: true});
-            
+            console.log('result', utils.showJSON(result));
             for (let i=0; i<result.length; i++) {
                 const r = result[i];
                 
@@ -115,30 +115,35 @@ var objectModel = {
                 if (r.fields.name !== undefined) node.name = r.fields.name;
                 
                 for (let fk in r.fields) {
-                    // find field keys like "_i_EDGETYPE"
-                    if (fk.substr(0,1) === '_' && fk.substr(2,1) === '_' && fk.substr(3) === destinationEdge.type) {
-                        const d = fk.substr(1,1);
-                        if ((d === 'i' && destinationEdge.direction === 'in') || (d === 'o' && destinationEdge.direction === 'out')) {
-                            node.availableEdgeNumber = r.fields[fk];
-                        }
-                    } else
+                    const fieldPrefix = fk.substr(0,3);
+                    const fieldType = fk.substr(3);
+                    const edgeDirection = fieldPrefix.substr(0,1);
+                    console.log('fieldPrefix', fieldPrefix);
+                    console.log('fieldType', fieldType);
                     
-                    if (fk.substr(0,1) === '_' && fk.substr(2,2) === 'e_' && fk.substr(4) === destinationEdge.type) {
-                        const d = fk.substr(1,1);
-                        if ((d === 'i' && destinationEdge.direction === 'in') || (d === 'o' && destinationEdge.direction === 'out')) {
+                    if (fieldType === destinationEdge.type && 
+                        ((edgeDirection === 'i' && destinationEdge.direction === 'in') || 
+                        (edgeDirection === 'o' && destinationEdge.direction === 'out'))) {
+                        // find field keys like "ie_HAS" or "oe_CONTROLS"
+                        if (fieldPrefix === 'ie_' || fieldPrefix === 'oe_') {
+                            node.availableEdgeNumber = r.fields[fk];
+                        } else
+                        // find field keys like "in_HAS" or "on_CONTROLS"
+                        if (fieldPrefix === 'in_' || fieldPrefix === 'on_') {
                             let edgeKeys = r.fields[fk];
                             
                             for (let j=0; j<edgeKeys.length; j++) {
                                 const ek = edgeKeys[j];
-                                const nnField = '_nn_' + ek;
+                                const nnField = 'nn_' + ek;
                                 subEdges[ek] = r.fields[nnField];
                             }
-                        }
-                    }                        
+                        }                        
+                    }
                 }
                 
                 if (Object.keys(subEdges).length > 0) node.subEdges = subEdges;
                 
+                console.log('node', utils.showJSON(node));
                 result[i] = node;
             }
                 

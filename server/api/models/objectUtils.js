@@ -131,14 +131,13 @@ var objectUtils = {
         delete n.labels;
         
         for (let fk in n.fields) {
-            const field2chars = fk.substring(0,2);
-            const field3chars = fk.substring(0,3);
+            const fieldNamePrefix = fk.substring(0,3);
             
-            if (['_i', '_o'].includes(field2chars) || ['_ie', '_oe', '_nn', '_ni'].includes(field3chars)) {
+            if (['ie_', 'oe_', 'nn_', 'ni_', 'in_', 'on_'].includes(fieldNamePrefix)) {
                 delete n.fields[fk];
             }
             
-            if (field2chars === '_f') {
+            if (fieldNamePrefix === 'nf_') {
                 n.fields[fk.substring(3)] = n.fields[fk];
                 delete n.fields[fk];
             }

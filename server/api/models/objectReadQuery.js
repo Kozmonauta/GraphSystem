@@ -109,7 +109,7 @@ var objectReadQuery = {
     findByEdge: function(destinationEdge) {
         logger.log(this.className + '.findByEdge', {type: 'function'});
 
-        let fieldName = '_' + (destinationEdge.direction === 'in' ? 'i' : 'o') + '_' + destinationEdge.type;
+        let fieldName = (destinationEdge.direction === 'in' ? 'ie_' : 'oe_') + destinationEdge.type;
         let query = 'MATCH (n) WHERE ';
         
         query += 'n.' + fieldName + '=-1 OR ' + 'n.' + fieldName + '>0 ';

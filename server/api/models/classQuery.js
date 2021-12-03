@@ -237,6 +237,7 @@ var classQuery = {
         return query;
     },
 
+    // returns object and its class, matched by obejct id (and label if provided)
     getForObject: function(params) {
         logger.log('classQuery.getForObject', {type: 'function'});
         var query = '';
