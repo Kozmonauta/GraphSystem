@@ -122,12 +122,13 @@ let objectCreateQuery = {
         let query = '';
         let newNodes = {};
         let newEdges = [];
-        // console.log('nodes', nodes);
+        console.log('nodes', nodes);
         for (let nk in nodes) {
             const na = nodes[nk];
             
             for (let ek in edges) {
                 let e = edges[ek];
+        console.log('e', e);
                 
                 if (e.target === nk || e.source === nk) {
                     // new node key
@@ -141,7 +142,7 @@ let objectCreateQuery = {
                         nnk = e.target;
                     }
                     nna = 'in_' + nnk;
-
+console.log('nnk', nnk);
 // TODO Insert id link for connected internal nodes to main node's fields. Hint: let main node creation for last and previously created node ids can be inserted.
 
                     // If the connected new node is referenced in the edges of the class

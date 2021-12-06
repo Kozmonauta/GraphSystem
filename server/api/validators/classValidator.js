@@ -52,7 +52,7 @@ exports.createExtendedCheck = function(c) {
     }
     
     // check if node keys and node field keys are valid
-    const validNodeFieldKeys = ['name', 'label', 'fields'];
+    const validNodeFieldKeys = ['name', 'label', 'fields', 'optional'];
     let invalidNodeFound = false;
     for (let nk in c.nodes) {
         const n = c.nodes[nk];
@@ -108,7 +108,7 @@ exports.createExtendedCheck = function(c) {
     }
 
     // check if edge keys and edge field keys are valid
-    const validEdgeFieldKeys = ['source', 'target', 'type', 'multiple'];
+    const validEdgeFieldKeys = ['source', 'target', 'type', 'multiple', 'optional'];
     let invalidEdgeFound = false;
     for (let ek in c.edges) {
         const e = c.edges[ek];

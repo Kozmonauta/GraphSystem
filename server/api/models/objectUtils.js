@@ -8,16 +8,19 @@ var objectUtils = {
         let i = 0;
         
         for (let ek in objectData.edges) {
+            // if internal edge
+            if (classData.edges[ek].source !== undefined && classData.edges[ek].target !== undefined) continue;
+            
             i++;
             let direction;
             let nodeToCheckID;
 
-            if (objectData.edges[ek].target !== undefined) {
+            if (classData.edges[ek].target !== undefined) {
                 direction = 'in';
-                nodeToCheckID = objectData.edges[ek].target;
+                nodeToCheckID = objectData.edges[ek].source;
             } else {
                 direction = 'out';
-                nodeToCheckID = objectData.edges[ek].source;
+                nodeToCheckID = objectData.edges[ek].target;
             }
             
             let type = classData.edges[ek].type;

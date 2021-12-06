@@ -3,6 +3,7 @@
 var generalValidator = require('../validators/generalValidator');
 var objectModel = require('../models/objectModel');
 var userModel = require('../models/userModel');
+var classUtils = require('../models/classUtils');
 var errorHandler = require('../errorHandler');
 var neo4jUtils = require('../neo4jUtils');
 
@@ -50,6 +51,21 @@ exports.patchRequestCheck = function(o) {
     return res;
 };
 
+exports.createEdgeOverrideCheck = function(o, c) {
+    let res = [];
+
+    // Check if object wants to override a class defined edge's internal connection
+    for (let ek in o.edges) {
+        if (o.edges[ek].type !== undefined ||
+            (c.edges[ek].source !== undefined && o.edges[ek].source !== undefined) || 
+            (c.edges[ek].target !== undefined && o.edges[ek].target !== undefined)) {
+            res.push({type: 'error', message: 'Cannot overwrite class internal edge definition'});
+        }
+    }
+    
+    return res;
+};
+
 exports.createObjectWithClassCheck = function(o, c) {
     let res = [];
     
@@ -60,7 +76,8 @@ exports.createObjectWithClassCheck = function(o, c) {
         // res.push({type: 'error', message: 'No path found between incoming and outgoing edges'});
         // return res;
     // }
-    
+    console.log('c', utils.showJSON(c));
+    console.log('o', utils.showJSON(o));
     // Check invalid node keys
     for (let nk in o.nodes) {
         if (c.nodes[nk] === undefined) {
@@ -95,32 +112,29 @@ exports.createObjectWithClassCheck = function(o, c) {
     }
     
     // Check main node
-    let mainNodeKey;
+    let mainNodeKey = classUtils.getMainNodeKey(c);
+    console.log('mainNodeKey', mainNodeKey);
     
-    for (let ek in c.edges) {
-        let e = c.edges[ek];
-        if (e.type === 'H' && e.source === undefined) {
-            mainNodeKey = ek;
-        }
-    }
-    
-    if (o.edges[mainNodeKey] === undefined) {
-        res.push({type: 'error', message: 'Main node must be set'});
-    }
+    // if (o.nodes[mainNodeKey] === undefined) {
+        // res.push({type: 'error', message: 'Main node must be set'});
+    // }
 
     // Check multiple edges
     for (let ek in o.edges) {
         if (c.edges[ek].multiple === true) {
-            res.push({type: 'error', message: 'Multiple connections cannot be added in this request'});
+            res.push({type: 'error', message: 'Multiple connections cannot be added to this request (edge: ' + ek + ')'});
         }
     }
     
-    // TODO test this
-    // Check if object wants to override a class defined edge's internal connection
-    for (let ek in o.edges) {
-        if ((c.edges[ek].source !== undefined && o.edges[ek].source !== undefined) || 
-            (c.edges[ek].target !== undefined && o.edges[ek].target !== undefined)) {
-            res.push({type: 'error', message: 'Cannot overwrite class internal edge definition'});
+        console.log('-- coherence check --');
+    // Object must be a coherent graph
+    for (let nk in o.nodes) {
+        console.log('--');
+        console.log('nk', nk);
+        if (!neo4jUtils.findPath(mainNodeKey, nk, o, c)) {
+            console.log('error: false');
+            res.push({type: 'error', message: 'Object must be a coherent graph'});
+            return res;
         }
     }
     

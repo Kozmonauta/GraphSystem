@@ -108,28 +108,49 @@ var neo4jUtils = {
     },
     
     // checks if path exists between n1Key and n2Key in an object
-    findPath: function(n1Key, n2Key, o, edgesChecked) {
+    findPath: function(n1Key, n2Key, o, c, nodesChecked, edgesChecked) {
+        console.log('-');
+        console.log('nodes: [ ' + n1Key + ' -- ' + n2Key + ' ]');
+        
+        if (n1Key === n2Key) {
+            console.log('true');
+            return true;
+        }
+        if (nodesChecked === undefined) nodesChecked = [];
         if (edgesChecked === undefined) edgesChecked = [];
         
         for (let ek in o.edges) {
-            if (edgesChecked.includes(ek)) continue;
+            const ce = c.edges[ek];
             
-            const e = o.edges[e];
-            if (e.target === n1Key || e.source === n1Key) {
-                edgesChecked.push(ek);
-                if (e.target === n1Key) {
-                    if (e.source === n2Key) {
-                        return true;
-                    } else {
-                        return this.findPath(e.source, n2Key, o, edgesChecked);
-                    }
+            if (ce.external === true || edgesChecked.includes(ek) || (ce.target !== n1Key && ce.source !== n1Key)) continue;
+        console.log('edge: [' + ce.source + ' -- ' + ce.target + ']');
+            
+            edgesChecked.push(ek);
+            if (ce.target === n1Key) {
+                if (ce.source === n2Key) {
+                    console.log('true');
+                    return true;
                 } else {
-                    if (e.target === n2Key) {
+                    console.log('recursive step');
+                    if (this.findPath(ce.source, n2Key, o, c, nodesChecked, edgesChecked)) {
                         return true;
-                    } else {
-                        return this.findPath(e.target, n2Key, o, edgesChecked);
                     }
+                    // return this.findPath(ce.source, n2Key, o, c, nodesChecked, edgesChecked);
                 }
+            } else 
+            if (ce.source === n1Key) {
+                if (ce.target === n2Key) {
+                    console.log('true');
+                    return true;
+                } else {
+                    console.log('recursive step');
+                    if (this.findPath(ce.target, n2Key, o, c, nodesChecked, edgesChecked)) {
+                        return true;
+                    }
+                    // return this.findPath(ce.target, n2Key, o, c, nodesChecked, edgesChecked);
+                }
+            } else {
+                console.log('should not be here');
             }
         }
         

@@ -6,6 +6,7 @@ var objectValidator = require('../validators/objectValidator');
 var classValidator = require('../validators/classValidator');
 var eventService = require('../services/eventService');
 var objectService = require('../services/objectService');
+var classUtils = require('../models/classUtils');
 var classService = require('../services/classService');
 var emailService = require('../services/emailService');
 var errorHandler = require('../errorHandler');
@@ -27,7 +28,8 @@ exports.create = function(req, res) {
     
     classModel.get(o['class'])
     .then(getClassResult => {
-        const extendedClassCheckResult = classValidator.createExtendedCheck(getClassResult);
+        let c = getClassResult;
+        const extendedClassCheckResult = classValidator.createExtendedCheck(c);
 
         if (!errorHandler.isValid(extendedClassCheckResult)) {
             res.status(400);
@@ -35,15 +37,24 @@ exports.create = function(req, res) {
             return;
         }
 
-        const objectWithClassResult = objectValidator.createObjectWithClassCheck(o, getClassResult);
-        
-        if (!errorHandler.isValid(objectWithClassResult)) {
+        const edgeOverrideCheckResult = objectValidator.createEdgeOverrideCheck(o, c);
+        c = classUtils.addExtension(c);
+
+        if (!errorHandler.isValid(edgeOverrideCheckResult)) {
             res.status(400);
-            res.json(objectWithClassResult);
+            res.json(edgeOverrideCheckResult);
             return;
         }
 
-        objectModel.create(o, getClassResult)
+        const objectWithClassCheckResult = objectValidator.createObjectWithClassCheck(o, c);
+        
+        if (!errorHandler.isValid(objectWithClassCheckResult)) {
+            res.status(400);
+            res.json(objectWithClassCheckResult);
+            return;
+        }
+
+        objectModel.create(o, c)
         .then(createObjectResult => {
             res.status(200);
             res.json(createObjectResult);

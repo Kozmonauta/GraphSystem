@@ -11,6 +11,7 @@ var objectModel = {
         logger.log('objectModel.create', {type: 'function'});
         
         const nodesToCheck = objectUtils.getNodesToCheck(objectData, classData);
+        console.log('nodesToCheck', nodesToCheck);
         const caeQuery = objectCreateQuery.checkAvailableEdges(nodesToCheck);
         const neo4jSession = neo4jDriver.session();
         const txc = neo4jSession.beginTransaction();
