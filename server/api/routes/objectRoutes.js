@@ -20,8 +20,8 @@ module.exports = function(app) {
 
     app.route('/objects/:id')
         .get(controller.get)
-        // .put(controller.update)
-        .patch(controller.patch)
+        .post(controller.update)
+        // .patch(controller.patch)
         // .delete(controller.delete)
     ;
     

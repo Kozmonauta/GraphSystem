@@ -113,16 +113,16 @@ exports.get = function(req, res) {
     });
 };
 
-exports.patch = function(req, res) {
-    logger.log('objectController.patch', {type: 'controllerFunction'});
+exports.update = function(req, res) {
+    logger.log('objectController.update', {type: 'controllerFunction'});
 
     const pid = req.headers.pid;
     const o = req.body;
-    const prcResult = objectValidator.patchRequestCheck(o);
+    const urcResult = objectValidator.updateRequestCheck(o);
     
-    if (!errorHandler.isValid(prcResult)) {
+    if (!errorHandler.isValid(urcResult)) {
         res.status(400);
-        res.json(prcResult);
+        res.json(urcResult);
         return;
     }
     
@@ -134,7 +134,8 @@ exports.patch = function(req, res) {
     
     classModel.getForObject(params)
     .then(getClassResult => {
-        const extendedClassCheckResult = classValidator.createExtendedCheck(getClassResult.c);
+        const c = getClassResult.c;
+        const extendedClassCheckResult = classValidator.createExtendedCheck(c);
 
         if (!errorHandler.isValid(extendedClassCheckResult)) {
             res.status(400);
@@ -142,7 +143,7 @@ exports.patch = function(req, res) {
             return;
         }
 
-        const objectWithClassResult = objectValidator.createObjectWithClassCheck(o, getClassResult);
+        const objectWithClassResult = objectValidator.createObjectWithClassCheck(o, c);
         
         if (!errorHandler.isValid(objectWithClassResult)) {
             res.status(400);
@@ -150,10 +151,10 @@ exports.patch = function(req, res) {
             return;
         }
 
-        objectModel.create(o, getClassResult)
-        .then(createObjectResult => {
+        objectModel.update(params, o, c)
+        .then(updateObjectResult => {
             res.status(200);
-            res.json(createObjectResult);
+            res.json(updateObjectResult);
         })
         .catch(e => {
             res.status(400);

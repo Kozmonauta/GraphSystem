@@ -2,6 +2,7 @@
 
 var objectCreateQuery = require('../models/objectCreateQuery');
 var objectReadQuery = require('../models/objectReadQuery');
+var objectUpdateQuery = require('../models/objectUpdateQuery');
 var objectUtils = require('../models/objectUtils');
 var neo4jUtils = require('../neo4jUtils');
 
@@ -78,9 +79,7 @@ var objectModel = {
         try {
             const resultRaw = await txc.run(query);
             let result = neo4jUtils.formatRecord(resultRaw.records[0]);
-            // console.log('result', result);
             let resultFormatted = objectUtils.formatGetResult(result);
-            // console.log('resultFormatted', resultFormatted);
             
             await txc.commit();
             return resultFormatted;
@@ -92,6 +91,37 @@ var objectModel = {
         }
     },
         
+    update: async function(oOldParams, oNew, c) {
+        logger.log('objectModel.update', {type: 'function'});
+        
+        const getQuery = objectReadQuery.get(oOldParams, c);
+        const neo4jSession = neo4jDriver.session();
+        const txc = neo4jSession.beginTransaction();
+
+        try {
+            const getResultRaw = await txc.run(getQuery);
+            const getResult = neo4jUtils.formatRecord(getResultRaw.records[0]);
+            const oOld = objectUtils.formatGetResult(getResult);
+console.log('oOld', utils.showJSON(oOld));
+console.log('oNew', utils.showJSON(oNew));
+console.log('c', utils.showJSON(c));
+            const updateQuery = objectUpdateQuery.update(oNew, oOld, c);
+
+            const updateResultRaw = await txc.run(updateQuery);
+            const updateResult = neo4jUtils.formatRecord(updateResultRaw.records[0]);
+            // console.log('createResult', createResult);
+            const updateResultFormatted = objectUtils.formatCreateResult(updateResult);
+            // console.log('createResultFormatted', utils.showJSON(createResultFormatted));
+            await txc.commit();
+            return updateResultFormatted;
+        } catch (e) {
+            await txc.rollback();
+            throw e;
+        } finally {
+            await neo4jSession.close();
+        }
+    },
+    
     findByEdge: async function(destinationEdge) {
         logger.log('objectModel.findByEdge', {type: 'function'});
 

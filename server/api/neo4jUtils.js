@@ -109,13 +109,10 @@ var neo4jUtils = {
     
     // checks if path exists between n1Key and n2Key in an object
     findPath: function(n1Key, n2Key, o, c, nodesChecked, edgesChecked) {
-        console.log('-');
-        console.log('nodes: [ ' + n1Key + ' -- ' + n2Key + ' ]');
-        
         if (n1Key === n2Key) {
-            console.log('true');
             return true;
         }
+        
         if (nodesChecked === undefined) nodesChecked = [];
         if (edgesChecked === undefined) edgesChecked = [];
         
@@ -123,34 +120,12 @@ var neo4jUtils = {
             const ce = c.edges[ek];
             
             if (ce.external === true || edgesChecked.includes(ek) || (ce.target !== n1Key && ce.source !== n1Key)) continue;
-        console.log('edge: [' + ce.source + ' -- ' + ce.target + ']');
             
             edgesChecked.push(ek);
-            if (ce.target === n1Key) {
-                if (ce.source === n2Key) {
-                    console.log('true');
-                    return true;
-                } else {
-                    console.log('recursive step');
-                    if (this.findPath(ce.source, n2Key, o, c, nodesChecked, edgesChecked)) {
-                        return true;
-                    }
-                    // return this.findPath(ce.source, n2Key, o, c, nodesChecked, edgesChecked);
-                }
-            } else 
-            if (ce.source === n1Key) {
-                if (ce.target === n2Key) {
-                    console.log('true');
-                    return true;
-                } else {
-                    console.log('recursive step');
-                    if (this.findPath(ce.target, n2Key, o, c, nodesChecked, edgesChecked)) {
-                        return true;
-                    }
-                    // return this.findPath(ce.target, n2Key, o, c, nodesChecked, edgesChecked);
-                }
-            } else {
-                console.log('should not be here');
+            
+            if ((ce.target === n1Key && (ce.source === n2Key || this.findPath(ce.source, n2Key, o, c, nodesChecked, edgesChecked))) ||
+                (ce.source === n1Key && (ce.target === n2Key || this.findPath(ce.target, n2Key, o, c, nodesChecked, edgesChecked)))) {
+                return true;
             }
         }
         

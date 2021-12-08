@@ -37,8 +37,13 @@ exports.createRequestCheck = function(o) {
     return res;
 };
 
-exports.patchRequestCheck = function(o) {
+exports.updateRequestCheck = function(o) {
     var res = [];
+    
+    if (o['class'] !== undefined) {
+        res.push({type: 'error', message: 'Class cannot be set on update'});
+        return ret;
+    }
     
     if (o.nodes !== undefined && typeof o.nodes !== 'object') {
         res.push({type: 'error', message: 'Nodes must be presented as an object'});
@@ -126,11 +131,8 @@ exports.createObjectWithClassCheck = function(o, c) {
         }
     }
     
-        console.log('-- coherence check --');
     // Object must be a coherent graph
     for (let nk in o.nodes) {
-        console.log('--');
-        console.log('nk', nk);
         if (!neo4jUtils.findPath(mainNodeKey, nk, o, c)) {
             console.log('error: false');
             res.push({type: 'error', message: 'Object must be a coherent graph'});

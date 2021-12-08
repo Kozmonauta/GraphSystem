@@ -4,109 +4,11 @@ let objectUpdateQuery = {
 
     className: 'objectUpdateQuery',
     
-    update: function(o, c, connectedSubNodes) {
+    update: function(oNew, oOld, c, connectedSubNodes) {
         logger.log(this.className + '.update', {type: 'function'});
-        // TODO handle node key corruption
-        let query = '';
+        
+        let query = 'MATCH (c:Core) RETURN c;';
 
-        let externalNodes = {};
-        let eni = 0;
-        let nodeAlias;
-        let mainNodeData = {
-            // edges which are connected to external nodes but not from the main node
-            subEdges: {}
-        };
-        const subNodeAlias = 'esn_' + eni;
-        
-        // Collect & match external nodes
-        for (let ek in o.edges) {
-            let e = o.edges[ek];
-
-            // if edge.target is an external node
-            if (e.target !== undefined) {
-                if (!this.isNodeAliased(e.target, externalNodes)) {
-                    nodeAlias = 'en_' + (eni++);
-                    externalNodes[nodeAlias] = e.target;
-                    query += 'MATCH (' + nodeAlias + ') WHERE ' + nodeAlias + '.id="' + e.target + '" ';
-                }
-                
-                if (e.subEdge !== undefined) {
-                    e.target = subNodeAlias;
-                } else {
-                    e.target = nodeAlias;
-                }
-            } else 
-            // if edge.source is an external node
-            if (e.source !== undefined) {
-                if (!this.isNodeAliased(e.source, externalNodes)) {
-                    nodeAlias = 'en_' + (eni++);
-                    externalNodes[nodeAlias] = e.source;
-                    query += 'MATCH (' + nodeAlias + ') WHERE ' + nodeAlias + '.id="' + e.source + '" ';
-                }
-
-                if (e.subEdge !== undefined) {
-                    e.source = subNodeAlias;
-                } else {
-                    e.source = nodeAlias;
-                }
-
-                if (c.edges[ek].type === 'H') {
-                    mainNodeData.key = c.edges[ek].target;
-                    mainNodeData.alias = 'in_' + mainNodeData.key;
-                }
-            }
-
-            if (e.subEdge !== undefined) {
-                externalNodes[subNodeAlias] = connectedSubNodes[e.subEdge].id;
-                query += 'MATCH (' + subNodeAlias + ') WHERE ' + subNodeAlias + '.id="' + connectedSubNodes[e.subEdge].id + '" ';
-            }
-        }
-        
-        // Nodes which are freshly aliased
-        let nodes = {};
-        for (let nk in externalNodes) {
-            nodes[nk] = nk;
-        }
-        
-        let edges = JSON.parse(JSON.stringify(o.edges));
-        utils.mergeObjects(edges, c.edges);
-        
-        // console.log('o', utils.showJSON(o));
-        // console.log('c', utils.showJSON(c));
-        // console.log('edges', utils.showJSON(edges));
-        
-        // Create edges and endnodes for the already matched external nodes until all edges are created
-        while (Object.keys(edges).length > 0) {
-            let cefnResult = this.createEdgesForNodes(nodes, edges, o, c, mainNodeData, connectedSubNodes);
-            nodes = cefnResult.nodes;
-            for (let i=0; i<cefnResult.edges.length; i++) {
-                delete edges[cefnResult.edges[i]];
-            }
-            query += cefnResult.query;
-        }
-        
-        // set additional non-main node connection info to main node
-        if (Object.keys(mainNodeData.subEdges).length > 0) {
-            query += 'SET ';
-            for (let nk in mainNodeData.subEdges) {
-                const nk1 = nk.substring(0, 2);
-                const nk2 = nk.substring(2);
-                const edgeMapperFieldName = mainNodeData.alias + '.' + nk1 + 'e' + nk2;
-                let subEdgeKeys = [];
-                
-                for (let sek in mainNodeData.subEdges[nk]) {
-                    subEdgeKeys.push(sek);
-                    query += mainNodeData.alias + '._ni_' + sek + '=' + mainNodeData.subEdges[nk][sek].nodeAlias + '.id,';
-                    query += mainNodeData.alias + '._nn_' + sek + '="' + mainNodeData.subEdges[nk][sek].nodeName + '",';
-                }
-                
-                query += edgeMapperFieldName + '=' + utils.formatField(subEdgeKeys) + ',';
-            }
-            query = query.substring(0, query.length - 1) + ' ';
-        }
-        
-        query += 'RETURN ' + mainNodeData.alias + ';';
-        
         console.log('query', query);
 
         return query;
