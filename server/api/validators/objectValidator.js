@@ -81,8 +81,17 @@ exports.createObjectWithClassCheck = function(o, c) {
         // res.push({type: 'error', message: 'No path found between incoming and outgoing edges'});
         // return res;
     // }
-    console.log('c', utils.showJSON(c));
-    console.log('o', utils.showJSON(o));
+    // console.log('c', utils.showJSON(c));
+    // console.log('o', utils.showJSON(o));
+    
+    // Check required nodes
+    for (let nk in c.nodes) {
+        const cn = c.nodes[nk];
+        if (cn.optional !== true && o.nodes[nk] === undefined) {
+            res.push({type: 'error', message: 'Node is required: ' + nk});
+        }
+    }
+    
     // Check invalid node keys
     for (let nk in o.nodes) {
         if (c.nodes[nk] === undefined) {
@@ -108,11 +117,35 @@ exports.createObjectWithClassCheck = function(o, c) {
         }
     }
     
-    // Check invalid edge keys
+    // Check required edges
+    for (let ek in c.edges) {
+        const ce = c.edges[ek];
+        if (ce.multiple !== true && ce.optional !== true && o.edges[ek] === undefined) {
+            res.push({type: 'error', message: 'Edge is required: ' + ek});
+        }
+    }
+    
     for (let ek in o.edges) {
-        if (c.edges[ek] === undefined) {
+        const oe = o.edges[ek];
+        const ce = c.edges[ek];
+        
+        // Check invalid edge keys
+        if (ce === undefined) {
             res.push({type: 'error', message: 'Invalid edge key for class'});
             return res;
+        }
+        
+        // Check invalid internal node references in edges
+        if (!classUtils.isEdgeExternal(ce)) {
+            if (o.nodes[ce.source] === undefined || o.nodes[ce.target] === undefined) {
+                res.push({type: 'error', message: 'Invalid node reference in edge:' + ek});
+                return res;
+            }
+        } else {
+            if (ce.source !== undefined && typeof ce.source === 'string' && o.nodes[ce.source] === undefined) {
+                res.push({type: 'error', message: 'Invalid node reference in edge:' + ek});
+                return res;
+            }
         }
     }
     
@@ -134,7 +167,6 @@ exports.createObjectWithClassCheck = function(o, c) {
     // Object must be a coherent graph
     for (let nk in o.nodes) {
         if (!neo4jUtils.findPath(mainNodeKey, nk, o, c)) {
-            console.log('error: false');
             res.push({type: 'error', message: 'Object must be a coherent graph'});
             return res;
         }

@@ -151,7 +151,7 @@ exports.update = function(req, res) {
             return;
         }
 
-        objectModel.update(params, o, c)
+        objectModel.update(o, params, c)
         .then(updateObjectResult => {
             res.status(200);
             res.json(updateObjectResult);

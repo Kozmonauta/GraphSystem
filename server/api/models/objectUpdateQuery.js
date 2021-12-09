@@ -4,7 +4,7 @@ let objectUpdateQuery = {
 
     className: 'objectUpdateQuery',
     
-    update: function(oNew, oOld, c, connectedSubNodes) {
+    update: function(updateParams, oNew, oOld, c, connectedSubNodes) {
         logger.log(this.className + '.update', {type: 'function'});
         
         let query = 'MATCH (c:Core) RETURN c;';

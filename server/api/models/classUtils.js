@@ -22,6 +22,10 @@ var classUtils = {
             }
         }
         return c;
+    },
+    
+    isEdgeExternal: function(e) {
+        return e.source === undefined || e.target === undefined || typeof e.source !== 'string' || typeof e.target !== 'string';
     }
     
 };

@@ -1,0 +1,56 @@
+update:
+
+- get new object data from request
+- validate request
+- fetch class of object from db
+- fetch current object from db
+- validate object with class
+
+- prepare update parameters
+    - collect nodes (internal) to be deleted (when a node is present in the current but not in the new object)
+    - collect edges (internal + external) to be deleted (when an edge is present in the current but not in the new object)
+
+    - collect new external nodes
+    - collect new internal nodes
+    - collect new edges
+
+    - collect changed nodes and their changed fields
+
+- if not all new external edge can be connected -> error
+- update available edge numbers on external nodes: +1 when edge is created, -1 when edge is deleted
+
+- build query
+    
+    - match new external nodes
+    - match current nodes (internal) and edges (internal+external)
+    
+    - delete the collected "edges to be deleted" (internal+external)
+    - delete the collected "nodes to be deleted" (internal)
+    
+    - create new nodes (internal)
+    - create new edges (internal+external)
+    
+    - set changed fields for changed nodes (internal)
+    
+    - return main node
+    
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+example:
+    nodesToBeDeleted: [F]
+    edgesToBeDeleted: [A-D, E1-B, F-E, F-E2]
+    newExternalNodes: [E3]
+    newInternalNodes: [G]
+    newExternalEdges: [E1-A, E3-E]
+    newInternalEdges: [E-D, E-G]
+    changedNodes: {D:{name:'New name'}, B:{name:'New name'}}
+    
+    match (e3)
+    match (a,b,c,d,e,f,e1,e2)
+    delete A-D, E1-B, F-E, F-E2
+    delete f
+    create g
+    create E1-A, E-D, E-G, E3-E
+    set d.name, b.name
+    return a
+    

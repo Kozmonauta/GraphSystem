@@ -91,7 +91,7 @@ var objectModel = {
         }
     },
         
-    update: async function(oOldParams, oNew, c) {
+    update: async function(oNew, oOldParams, c) {
         logger.log('objectModel.update', {type: 'function'});
         
         const getQuery = objectReadQuery.get(oOldParams, c);
@@ -105,7 +105,10 @@ var objectModel = {
 console.log('oOld', utils.showJSON(oOld));
 console.log('oNew', utils.showJSON(oNew));
 console.log('c', utils.showJSON(c));
-            const updateQuery = objectUpdateQuery.update(oNew, oOld, c);
+            
+            const updateParams = objectUtils.prepareUpdateParameters(oNew, oOld, c);
+console.log('updateParams', updateParams);
+            const updateQuery = objectUpdateQuery.update(updateParams);
 
             const updateResultRaw = await txc.run(updateQuery);
             const updateResult = neo4jUtils.formatRecord(updateResultRaw.records[0]);

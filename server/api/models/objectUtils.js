@@ -146,6 +146,86 @@ var objectUtils = {
         }
         
         return n;
+    },
+    
+    prepareUpdateParameters: function(oNew, oOld, c) {
+        let ups = {
+            nodesToBeDeleted: [],
+            edgesToBeDeleted: [],
+            newExternalNodes: [],
+            newInternalNodes: [],
+            newEdges: [],
+            nodeFieldUpdates: {},
+            nodeFieldDeletes: {}
+        };
+
+        // collect nodes (internal) to be deleted (when a node is present in the current but not in the new object)
+        for (let nk in oOld.nodes) {
+            if (oNew.nodes[nk] === undefined) {
+                ups.nodesToBeDeleted.push(nk);
+            }
+        }
+
+        // collect edges (internal + external) to be deleted (when an edge is present in the current but not in the new object)
+        for (let ek in oOld.edges) {
+            if (oNew.edges[ek] === undefined) {
+                ups.edgesToBeDeleted.push(ek);
+            }
+        }
+        
+        for (let ek in oNew.edges) {
+            if (oOld.edges[ek] === undefined) {
+                // collect new edges
+                ups.newEdges.push(ek);
+                
+                // collect new external nodes
+                const eee = objectUtils.getEdgeExternalEndpoint(oNew.edges[ek]);
+                if (eee !== undefined) {
+                    ups.newExternalNodes.push(eee);
+                }
+            }
+        }
+        
+        // collect new internal nodes
+        for (let nk in oNew.nodes) {
+            if (oOld.nodes[nk] === undefined) {
+                ups.newInternalNodes.push(nk);
+            }
+        }
+
+        // collect changed nodes and their changed fields
+        for (let nk in oNew.nodes) {
+            const on = oOld.nodes[nk];
+            const nn = oNew.nodes[nk];
+            
+            // collect fields to be updated
+            for (let fk in nn.fields) {
+                if (nn.fields[fk] !== undefined  && (on.fields[fk] === undefined || on.fields[fk] !== nn.fields[fk])) {
+                    if (ups.nodeFieldUpdates[nk] === undefined) ups.nodeFieldUpdates[nk] = [];
+                    ups.nodeFieldUpdates[nk].push(fk);
+                }
+            }
+            
+            // collect fields to be deleted
+            for (let fk in on.fields) {
+                if (nn.fields[fk] === undefined) {
+                    if (ups.nodeFieldDeletes[nk] === undefined) ups.nodeFieldDeletes[nk] = [];
+                    ups.nodeFieldDeletes[nk].push(fk);
+                }
+            }
+        }
+        
+        return ups;
+    },
+    
+    // precondition: edge is valid
+    isEdgeExternal: function(e) {
+        return e.source !== undefined || e.target !== undefined;
+    },
+    
+    // precondition: edge is valid
+    getEdgeExternalEndpoint: function(e) {
+        return (e.source === undefined && e.target === undefined) ? undefined : (e.source === undefined ? e.target : e.source);
     }
     
 };

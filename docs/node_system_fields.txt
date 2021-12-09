@@ -1,0 +1,8 @@
+Node fields prefixes:
+ni_: node id
+nn_: node name
+nf_: node field - custom fields
+ie_: incoming edge - incoming free edge count (-1=infinite) of a type (eg. ie_CONTROLS: -1)
+oe_: outgoing edge
+in_: incoming edge mapping
+on_: outgoing edge mapping

@@ -1,0 +1,8 @@
+ok - node field prefixes fix
+ok - on "object create" all edges must be included in the request, they won't be auto-filled from the class
+ok - pathfinder function
+ok - object create/update validation: the object must be coherent (use pathfinder function)
+- class create: internal edges can be optional / required
+- class create: internal nodes can be optional / required (done?)
+- object create/update validation: check the required nodes and edges in the object
+- 
