@@ -1,8 +1,96 @@
-Node fields prefixes:
-ni_: node id
-nn_: node name
-nf_: node field - custom fields
-ie_: incoming edge - incoming free edge count (-1=infinite) of a type (eg. ie_CONTROLS: -1)
-oe_: outgoing edge
-in_: incoming edge mapping
-on_: outgoing edge mapping
+On the main node of an object the following system field prefixes are used:
+
+ie_, oe_ (incoming edge, outgoing edge)
+    Info
+        Number of an object's available incoming / outgoing edges. The object's main node shows information about how many edges of a type can be connected to the object. If the value is -1 then there any. 
+    
+    Format
+        Field name: prefix + edge type
+        Field value: number of available connections
+    
+    Examples
+        ie_ACTS: 2 -> maximum 2 ACTS type incoming edge can be connected.
+
+ni_ (node id)
+    Info
+        The id of the internal endnode of an external edge.
+    
+    Format
+        Field name: prefix + edge key
+        Field value: id of internal node
+    
+    Examples
+        ni_acts: 1c21f911-bf1e-4844-a94c-cff5ff63e8c8 -> The edge with key = "acts" has "1c21f911..." as internal node id
+    
+nn_ (node name)
+    Info
+        The name of the node which is determined by ni_.
+
+    Format
+        Field name: prefix + edge key
+        Field value: name of internal node (if object name is defined => object name, else class name)
+    
+    Examples
+        nn_acts: "Main"
+    
+nf_ (node field)
+    Info
+        Custom fields of a node.
+    
+    Format
+        Field name: prefix + field name, which is defined by the class
+        Field value: any value
+    
+    Examples
+        ni_birthDate: "2020-08-10"
+
+in_ (incoming nodes)
+    Info
+        The keys of the incoming edges that have the type "ACTS".
+    
+    Format
+        Field name: prefix + edge type
+        Field value: array of edge keys
+    
+    Examples
+        in_ACTS: ["acts1", "acts2"]
+    
+on_ (outgoing nodes)
+    Info
+        The keys of the outgoing edges that have the type "ACTS".
+    
+    Format
+        Field name: prefix + edge type
+        Field value: array of edge keys
+    
+    Examples
+        on_ACTS: ["acts1", "acts2"]
+
+--
+    
+ie_C:-1
+ie_DIKK:1
+ie_OF:1
+ie_OG:1
+in_DIKK:d_e2
+in_OF:f_e
+in_OG:g_e_in
+name:B 1
+nf_name:B 1
+ni_c_e1:6e02d855-d174-4ea0-886c-272b1afa4083
+ni_d_e1:de9400ea-5f96-433c-9396-2ed857ae55b2
+ni_d_e2:de9400ea-5f96-433c-9396-2ed857ae55b2
+ni_f_e:5c02b7ce-ae74-49ea-8ae3-b56961d9c266
+ni_g_e_in:b2e00d74-af93-4f87-910f-81f1de27b008
+ni_g_e_out:b2e00d74-af93-4f87-910f-81f1de27b008
+nn_c_e1:C
+nn_d_e1:D
+nn_d_e2:D
+nn_f_e:F
+nn_g_e_in:G
+nn_g_e_out:G
+oe_DIKK:2
+oe_H:-1
+oe_OG:1
+on_DIKK:c_e1,d_e1
+on_OG:g_e_out

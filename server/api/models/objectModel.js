@@ -108,7 +108,7 @@ console.log('c', utils.showJSON(c));
             
             const updateParams = objectUtils.prepareUpdateParameters(oNew, oOld, c);
 console.log('updateParams', updateParams);
-            const updateQuery = objectUpdateQuery.update(updateParams);
+            const updateQuery = objectUpdateQuery.update(oNew, oOld, c, updateParams);
 
             const updateResultRaw = await txc.run(updateQuery);
             const updateResult = neo4jUtils.formatRecord(updateResultRaw.records[0]);

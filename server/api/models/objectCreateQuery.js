@@ -10,17 +10,18 @@ let objectCreateQuery = {
         let query = '';
 
         let externalNodes = {};
-        let eni = 0;
+        let eni = 0; // external node index
+        let ensi = 0; // external node sub edge index
         let nodeAlias;
         let mainNodeData = {
             // edges which are connected to external nodes but not from the main node
             subEdges: {}
         };
-        const subNodeAlias = 'esn_' + eni;
         
         // Collect & match external nodes
         for (let ek in o.edges) {
             let e = o.edges[ek];
+            let subNodeAlias = 'ens_' + ensi;
 
             // if edge.target is an external node
             if (e.target !== undefined) {
@@ -59,6 +60,7 @@ let objectCreateQuery = {
             if (e.subEdge !== undefined) {
                 externalNodes[subNodeAlias] = connectedSubNodes[e.subEdge].id;
                 query += 'MATCH (' + subNodeAlias + ') WHERE ' + subNodeAlias + '.id="' + connectedSubNodes[e.subEdge].id + '" ';
+                ensi++;
             }
         }
         

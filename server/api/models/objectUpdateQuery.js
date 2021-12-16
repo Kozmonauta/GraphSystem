@@ -1,13 +1,43 @@
 'use strict';
 
+var classUtils = require('../models/classUtils');
+var objectReadQuery = require('../models/objectReadQuery');
+
 let objectUpdateQuery = {
 
     className: 'objectUpdateQuery',
     
-    update: function(updateParams, oNew, oOld, c, connectedSubNodes) {
+    update: function(oNew, oOld, c, updateParams) {
         logger.log(this.className + '.update', {type: 'function'});
         
-        let query = 'MATCH (c:Core) RETURN c;';
+        let query = '';
+        let mainNodeKey = classUtils.getMainNodeKey(c);
+        let mainNodeAlias = 'in_' + mainNodeKey;
+
+        // match new external nodes
+        query += 'MATCH ';
+        
+        // match current nodes (internal) and edges (internal+external)
+        query += 'MATCH (' + mainNodeAlias + ':' + c.nodes[mainNodeKey].label + ') WHERE ' + mainNodeAlias + '.id="' + oOld.nodes[mainNodeKey].id + '" ';
+        
+        let startNodes = [mainNodeKey];
+        let aliasedNodes = [mainNodeAlias];
+        let aliasedEdges = [];
+        
+        query += objectReadQuery.getConnectedEdges(c, startNodes, aliasedNodes, aliasedEdges, 0);
+        
+        query += ' RETURN DISTINCT ';
+
+        for (let i=0; i<aliasedNodes.length; i++) {
+            query += aliasedNodes[i] + ',';
+        }
+        
+        for (let i=0; i<aliasedEdges.length; i++) {
+            query += aliasedEdges[i] + ',';
+        }
+        
+        query = query.substring(0, query.length - 1);
+        query += ';';
 
         console.log('query', query);
 

@@ -1,5 +1,7 @@
 'use strict';
 
+var classUtils = require('../models/classUtils');
+
 var objectReadQuery = {
 
     className: 'objectReadQuery',
@@ -63,26 +65,14 @@ var objectReadQuery = {
     get: function(params, c) {
         logger.log(this.className + '.get', {type: 'function'});
 
-        let query = '';
-        let mainNodeKey;
-        let mainNodeAlias;
         // console.log('params', params);
         // console.log('c', utils.showJSON(c));
 
-        // Locate main node
-        for (let ek in c.edges) {
-            const e = c.edges[ek];
-            if (e.source === undefined && e.type === 'H') {
-                mainNodeKey = e.target;
-                mainNodeAlias = 'in_' + mainNodeKey;
-            }
-        }
+        let query = '';
+        let mainNodeKey = classUtils.getMainNodeKey(c);
+        let mainNodeAlias = 'in_' + mainNodeKey;
 
-        if (params.objectLabel !== undefined) {
-            query += 'MATCH (' + mainNodeAlias + ':' + params.objectLabel + ') WHERE ' + mainNodeAlias + '.id="' + params.objectID + '" ';
-        } else {
-            query += 'MATCH (' + mainNodeAlias + ') WHERE ' + mainNodeAlias + '.id="' + params.objectID + '" ';
-        }
+        query += 'MATCH (' + mainNodeAlias + ':' + c.nodes[mainNodeKey].label + ') WHERE ' + mainNodeAlias + '.id="' + params.objectID + '" ';
         
         let startNodes = [mainNodeKey];
         let aliasedNodes = [mainNodeAlias];
