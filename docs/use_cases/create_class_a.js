@@ -3,6 +3,8 @@
     "definer": "{{coreID}}",
     "nodes": {
         "A0": {
+            "label": "A0",
+            "name": "A0",
             "fields": {
                 "name": {
                     "type": "string"
@@ -10,6 +12,8 @@
             }
         },
         "A1": {
+            "label": "A1",
+            "name": "A1",
             "fields": {
                 "name": {
                     "type": "string"
@@ -17,6 +21,8 @@
             }
         },
         "A2": {
+            "label": "A2",
+            "name": "A2",
             "fields": {
                 "name": {
                     "type": "string"
@@ -24,6 +30,8 @@
             }
         },
         "A3": {
+            "label": "A3",
+            "name": "A3",
             "fields": {
                 "name": {
                     "type": "string"
@@ -31,6 +39,8 @@
             }
         },
         "A4": {
+            "label": "A4",
+            "name": "A4",
             "fields": {
                 "name": {
                     "type": "string"
@@ -38,6 +48,8 @@
             }
         },
         "A5": {
+            "label": "A5",
+            "name": "A5",
             "fields": {
                 "name": {
                     "type": "string"
@@ -45,6 +57,8 @@
             }
         },
         "A6": {
+            "label": "A6",
+            "name": "A6",
             "fields": {
                 "name": {
                     "type": "string"
@@ -52,6 +66,8 @@
             }
         },
         "A7": {
+            "label": "A7",
+            "name": "A7",
             "fields": {
                 "name": {
                     "type": "string"
@@ -59,6 +75,8 @@
             }
         },
         "A8": {
+            "label": "A8",
+            "name": "A8",
             "fields": {
                 "name": {
                     "type": "string"
@@ -66,6 +84,8 @@
             }
         },
         "A9": {
+            "label": "A9",
+            "name": "A9",
             "fields": {
                 "name": {
                     "type": "string"
@@ -73,6 +93,8 @@
             }
         },
         "A10": {
+            "label": "A10",
+            "name": "A10",
             "fields": {
                 "name": {
                     "type": "string"
@@ -80,6 +102,8 @@
             }
         },
         "A11": {
+            "label": "A11",
+            "name": "A11",
             "fields": {
                 "name": {
                     "type": "string"
@@ -87,6 +111,8 @@
             }
         },
         "A12": {
+            "label": "A12",
+            "name": "A12",
             "fields": {
                 "name": {
                     "type": "string"
@@ -106,7 +132,8 @@
         },
         "A0_I_x": {
             "type": "I",
-            "source": "A0"
+            "source": "A0",
+            "optional": true
         },
         "A1_J_A2": {
             "type": "J",
@@ -170,11 +197,13 @@
         },
         "A9_H_x": {
             "type": "H",
-            "source": "A9"
+            "source": "A9",
+            "optional": true
         },
         "A9_L_x": {
             "type": "L",
-            "source": "A9"
+            "source": "A9",
+            "optional": true
         },
         "A9_K_x": {
             "type": "K",
@@ -188,7 +217,8 @@
         },
         "x_L_A10": {
             "type": "L",
-            "target": "A10"
+            "target": "A10",
+            "optional": true
         },
         "A11_M_A10": {
             "type": "M",

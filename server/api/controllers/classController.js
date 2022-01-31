@@ -7,36 +7,74 @@ var classService = require('../services/classService');
 var classValidator = require('../validators/classValidator');
 var errorHandler = require('../errorHandler');
 
-exports.create = function(req, res) {
+exports.create = async function(req, res) {
     logger.log('classController.create', {type: 'controllerFunction'});
     
     var c = req.body;
-    console.log('c', c);
-    // var cResult = classValidator.create(c);
-    
-    // if (!errorHandler.isValid(cResult)) {
-        // res.status(400);
-        // res.json(cResult);
-        // return;
-    // }
-    
-    classModel.create(c)
-    .then(createClassResult => {
-        var ccResult = classValidator.createResultCheck(createClassResult);
-        
-        if (!errorHandler.isValid(ccResult)) {
-            res.status(400);
-            res.json(ccResult);
-            return;
+    console.log('Class name: ', c.name);
+    if (c['extends'] !== undefined) {
+        try {
+            const superClasses = await classModel.get(c['extends']);
+            
+            // In case of extending multiple classes
+            if (Array.isArray(c['extends'])) {
+                for (let sck in superClasses) {
+                    utils.mergeObjects(c, superClasses[sck]);
+                }
+            } else 
+            // Extending 1 class
+            {
+                utils.mergeObjects(c, superClasses);
+            }
+        } catch (e) {
+            throw e;
+        } finally {
+            delete c['extends'];
         }
+    }
+    
+    const validationErrors = classValidator.createExtendedCheck(c);
+    console.log('validationErrors', validationErrors);
+
+    if (validationErrors.length > 0) {
+        res.status(400);
+        res.json(validationErrors);
+        return;
+    }
+    
+    try {
+        const createClassResult = await classModel.create(c);
+        // const ccResult = classValidator.createResultCheck(createClassResult);
+        
+        // if (ccResult.errors.length > 0) {
+            // throw ccResult;
+        // }
 
         res.status(200);
         res.json(createClassResult);
-    })
-    .catch(e => {
+    } catch(e) {
         res.status(400);
         res.json(e);
-    });
+        // return;
+    }
+    
+    // classModel.create(c)
+    // .then(createClassResult => {
+        // var ccResult = classValidator.createResultCheck(createClassResult);
+        
+        // if (ccResult.errors.length > 0) {
+            // res.status(400);
+            // res.json(ccResult);
+            // return;
+        // }
+
+        // res.status(200);
+        // res.json(createClassResult);
+    // })
+    // .catch(e => {
+        // res.status(400);
+        // res.json(e);
+    // });
 };
 
 exports.createSimple = function(req, res) {

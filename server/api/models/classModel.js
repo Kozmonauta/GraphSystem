@@ -15,40 +15,15 @@ var classModel = {
         const txc = neo4jSession.beginTransaction();
         
         try {
-            // Class has to be validated on object creation as well, because there can be invalid classes
-            if (c['extends'] !== undefined) {
-                let ec = JSON.parse(JSON.stringify(c));
-                
-                if (Array.isArray(c['extends'])) {
-                    const extendsResultRaw = await txc.run(classQuery.get({ids: c['extends']}, {mode: 'inherited'}));
-                    const extendsResult = neo4jUtils.formatRecord(extendsResultRaw.records[0]);
-                    for (let erk in extendsResult) {
-                        utils.mergeObjects(ec, extendsResult[erk]);
-                    }
-                } else {
-                    const extendsResultRaw = await txc.run(classQuery.get({id: c['extends']}, {mode: 'inherited'}));
-                    const extendsResult = neo4jUtils.formatRecord(extendsResultRaw.records[0], {singleRecord: true});
-                    utils.mergeObjects(ec, extendsResult);
-                }
-                
-                // console.log('ec', utils.showJSON(ec));
-                
-                const extendedClassErrors = classValidator.createExtendedCheck(ec);
-                // console.log('extendedClassErrors', utils.showJSON(extendedClassErrors));
-                
-                if (extendedClassErrors.length > 0) {
-                    throw extendedClassErrors;
-                }
-            }
-            
             const resultRaw = await txc.run(classQuery.create(c));
             const result = neo4jUtils.formatRecord(resultRaw.records[0], {singleRecord: true});
 
             await txc.commit();
+            
             return result;
         } catch (e) {
             await txc.rollback();
-            throw e;
+            // throw e;
         } finally {
             await neo4jSession.close();
         }
@@ -116,18 +91,20 @@ var classModel = {
         const txc = neo4jSession.beginTransaction();
 
         if (options === undefined) options = {mode: 'inherited'};
-        if (typeof filter === 'string') filter = {id: filter};
+        if (typeof filter === 'string') { filter = {id: filter} } else 
+        if (Array.isArray(filter)) { filter = {ids: filter} }
+        const singleRecord = filter.id !== undefined ? true : false;
         
         const query = classQuery.get(filter, options);
         
         try {
             const resultRaw = await txc.run(query);
-            
+
             if (resultRaw.records.length === 0) {
                 throw new Error('Class not found');
             }
             
-            const result = neo4jUtils.formatRecord(resultRaw.records[0], {singleRecord: true});
+            const result = neo4jUtils.formatRecord(resultRaw.records[0], {singleRecord: singleRecord});
             await txc.commit();
             return result;
         } catch (e) {

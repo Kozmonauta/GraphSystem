@@ -226,7 +226,7 @@ var classQuery = {
                     query += 'RETURN ';
                     for (let i=0; i<filter.ids.length; i++) {
                         const nodeAlias = 'n' + i;
-                        query += 'dn.collectInheritData(' + nodeAlias + '.id,"Class","E","out",null),';
+                        query += 'dn.collectInheritData(' + nodeAlias + '.id,"Class","E","out",null) AS ' + nodeAlias + ',';
                     }
                     query = query.substring(0, query.length - 1) + ';';
                 }

@@ -4,7 +4,6 @@ var generalValidator = require('../validators/generalValidator');
 
 exports.createExtendedCheck = function(c) {
     logger.log('classValidator.createExtendedCheck', {type: 'function'});
-// console.log('c', utils.showJSON(c));
 
     let errors = [];
 
@@ -12,21 +11,15 @@ exports.createExtendedCheck = function(c) {
     // formal requirements
     
     // check invalid fields in class root object
-    const validClassFieldKeys = ['id', 'name', 'nodes', 'edges', 'definer', 'extends'];
-    let invalidClassFieldKeyFound = false;
+    const validClassFieldKeys = ['id', 'name', 'nodes', 'edges', 'abstract', 'definer', 'extends'];
+    
     for (let fk in c) {
         if (!validClassFieldKeys.includes(fk)) {
-            invalidClassFieldKeyFound = true;
-            errors.push({
-                message: 'Invalid field: ' + fk
-            });
+            errors.push({ message: 'Invalid field: ' + fk });
+            return errors;
         }
     }
 
-    if (invalidClassFieldKeyFound === true) {
-        return errors;
-    }
-    
     // check if name valid
     if (c.name === undefined || typeof c.name !== 'string' || c.name.length === 0) {
         errors.push({
@@ -44,7 +37,7 @@ exports.createExtendedCheck = function(c) {
     }
     
     // check if any edge is defined
-    if (c.edges === undefined || typeof c.edges !== 'object' || Object.keys(c.edges).length === 0) {
+    if (c['abstract'] !== true && (c.edges === undefined || typeof c.edges !== 'object' || Object.keys(c.edges).length === 0)) {
         errors.push({
             message: 'Class must have >=1 edges'
         });
@@ -86,18 +79,18 @@ exports.createExtendedCheck = function(c) {
         }
         
         // check node name
-        if (n.name === undefined || typeof n.name !== 'string' || n.name.length === 0) {
+        if (c['abstract'] !== true && (n.name === undefined || typeof n.name !== 'string' || n.name.length === 0)) {
             invalidNodeFound = true;
             errors.push({
-                message: 'Invalid name in node:' + nk
+                message: 'Invalid name in node: ' + nk
             });
         }
-        
+
         // check node label
-        if (n.label === undefined || typeof n.label !== 'string' || n.label.length === 0 || !n.label.match("^[A-Za-z0-9_]+$") || n.label.substring(0,1) === '_') {
+        if (c['abstract'] !== true && (n.label === undefined || typeof n.label !== 'string' || n.label.length === 0 || !n.label.match("^[A-Za-z0-9_]+$") || n.label.substring(0,1) === '_')) {
             invalidNodeFound = true;
             errors.push({
-                message: 'Invalid label in node:' + nk
+                message: 'Invalid label in node: ' + nk
             });
         }
         
@@ -204,186 +197,35 @@ exports.createExtendedCheck = function(c) {
     //
     // informal requirements
     
-    // check if exactly 1 main node is present
-    let mainNodeCount = 0;
-    for (let ek in c.edges) {
-        const e = c.edges[ek];
-        if (e.type === 'H' && e.source === undefined) {
-            mainNodeCount++;
+    if (c['abstract'] !== true) {
+        // check if exactly 1 main node is present
+        let mainNodeCount = 0;
+        for (let ek in c.edges) {
+            const e = c.edges[ek];
+            if (e.type === 'H' && e.source === undefined) {
+                mainNodeCount++;
+            }
         }
-    }
-    
-    if (mainNodeCount !== 1) {
-        errors.push({
-            message: 'Class must have 1 main node (node with H type incoming edge)'
-        });
+        
+        if (mainNodeCount !== 1) {
+            errors.push({
+                message: 'Class must have 1 main node (node with H type incoming edge)'
+            });
+        }
     }
     
     return errors;
 };
 
 exports.createResultCheck = function(cr) {
-    let errors = [];
+    let result = { errors: [] };
     
     if (cr.records === undefined || cr.records.length === 0) {
         errors.push({
             message: 'Class could not be created'
         });
     } 
-};
-
-exports.checkRequired = function(res, o, c, options) {
-    if (options === undefined) options = {};
     
-    for (var fk in c.fields) {
-        if (utils.isTrue(c.fields[fk].required) && utils.isEmpty(o.fields[fk]) && c.fields[fk].textType !== 'password') {
-            utils.addError({
-                code: 'object_field_required',
-                fieldKey: fk,
-                fieldName: c.fields[fk].name
-            }, res);
-        }
-    }
-    
-    for (var ck in c.connections) {
-        if (utils.isTrue(c.connections[ck].required) && utils.isEmpty(o.connections[ck])) {
-            utils.addError({
-                code: 'object_connection_required',
-                fieldKey: ck,
-                fieldName: c.connections[ck].name
-            }, res);
-        }
-    }
-};
-
-exports.checkFormat = function(res, o, c, options) {
-    if (options === undefined) options = {};
-    
-    // if (propertyClass.type === 'text' && propertyClass.textType === 'email') {
-        // res = generalValidator.email(property, res);
-    // }
-    for (var fk in c.fields) {
-        if (utils.isTrue(c.fields[fk].required) && utils.isEmpty(o.fields[fk]) && c.fields[fk].textType !== 'password') {
-            utils.addError({
-                code: 'object_field_required',
-                fieldKey: fk,
-                fieldName: c.fields[fk].name
-            }, res);
-        }
-    }
-};
-
-exports.add = function(o, c, res, options) {
-    if (options === undefined) options = {};
-    
-    var coreId;
-    for (var nk in c.nodes) {
-        var nodeClass = c.nodes[nk];
-        if (nodeClass.type === 'core') {
-            coreId = o.nodes[nk].id;
-        }
-    }
-    
-    for (var nk in c.nodes) {
-        var nodeClass = c.nodes[nk];
-        
-        for (var pk in nodeClass.properties) {
-            var propertyClass = nodeClass.properties[pk];
-            
-            if (o.nodes[nk] === undefined) {
-                res = utils.addError({
-                    code: 'object_node_required',
-                    nodeKey: nk
-                }, res);
-            }
-            
-            var property = o.nodes[nk][pk];
-            if (propertyClass.required === true) {
-                if (propertyClass.textType !== 'password' || o.nodes[nk].id === options.pid) {
-                    if (utils.isEmpty(property)) {
-                        res = utils.addError({
-                            code: 'node_property_required',
-                            propertyKey: nk + '.' + pk
-                        }, res);
-                    }
-                }
-            }
-            
-            if (propertyClass.type === 'text' && propertyClass.textType === 'email') {
-                res = generalValidator.email(property, res);
-            }
-            
-            // @TODO handle property.rules
-        }
-    }
-    
-    if (res === undefined) res = { valid: true, items: [] };
-    
-    return res;
-};
-
-exports.account = function(o, c, res, options) {
-    if (res === undefined) res = { valid: true, items: [] };
-    
-    var email = o.nodes['Account'].email;
-            console.log('account vali', email);
-    var done = false;
-
-    userModel.getByEmail({email: email},
-        function(rRes) {
-            console.log('getByEmail', rRes);
-            done = true;
-        },
-        function(rErr) {
-            res.status(400);
-            done = true;
-            res.json({'error':'db error'});
-        },
-        function() {
-            if (!done) {
-                res.status(401);
-                res.json({'error':'other login error'});
-            }
-        }
-    );
-    var sameEmails = objectModel.find();
-    
-    
-    return res;
-};
-
-exports.update = function(o, c, res) {
-    console.log('ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo UPDATE');
-    console.log('o', o);
-    // console.log('c', c);
-    
-    for (var nk in o.nodes) {
-        var node = o.nodes[nk];
-        var nodeClass = c.nodes[nk];
-        
-        for (var pk in node) {
-            var propertyValue = node[pk];
-            if (pk === 'id') {
-                if (utils.isEmpty(propertyValue)) {
-                    res = utils.addError({code: 'object_id_required', message: 'Object id required'}, res);
-                }
-                continue;
-            }
-            
-            var propertyClass = nodeClass.properties[pk];
-            
-            if (propertyClass.type === 'text' && propertyClass.textType === 'email') {
-    console.log('EMAIL', propertyValue);
-                res = generalValidator.email(propertyValue, res);
-            }
-            
-            // console.log('propertyClass', propertyClass);
-        }
-    }
-    console.log('valid result', res);
-    return res;
-};
-
-exports.delete = function(object) {
+    return errors;
 };
 

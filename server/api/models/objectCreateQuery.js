@@ -18,7 +18,7 @@ let objectCreateQuery = {
             subEdges: {}
         };
         
-        // Collect & match external nodes
+        // Collect & match external nodes (TODO is it a good assumption? if 1 endnode of an object is defined -> external edge)
         for (let ek in o.edges) {
             let e = o.edges[ek];
             let subNodeAlias = 'ens_' + ensi;
@@ -70,6 +70,7 @@ let objectCreateQuery = {
             nodes[nk] = nk;
         }
         
+        // clone o.edges
         let edges = JSON.parse(JSON.stringify(o.edges));
         utils.mergeObjects(edges, c.edges);
         
@@ -124,15 +125,15 @@ let objectCreateQuery = {
         let query = '';
         let newNodes = {};
         let newEdges = [];
-        console.log('nodes', nodes);
+        console.log('Search edges for nodes: ', nodes);
         for (let nk in nodes) {
             const na = nodes[nk];
             
             for (let ek in edges) {
                 let e = edges[ek];
-        console.log('e', e);
                 
                 if (e.target === nk || e.source === nk) {
+        console.log('edge: ', ek);
                     // new node key
                     let nnk;
                     // new node alias
@@ -144,7 +145,7 @@ let objectCreateQuery = {
                         nnk = e.target;
                     }
                     nna = 'in_' + nnk;
-console.log('nnk', nnk);
+console.log('connected new node: ', nnk);
 // TODO Insert id link for connected internal nodes to main node's fields. Hint: let main node creation for last and previously created node ids can be inserted.
 
                     // If the connected new node is referenced in the edges of the class
