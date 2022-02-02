@@ -9,83 +9,36 @@ let objectCreateQuery = {
         // TODO handle node key corruption
         let query = '';
 
-        let externalNodes = {};
-        let eni = 0; // external node index
-        let ensi = 0; // external node sub edge index
-        let nodeAlias;
-        let mainNodeData = {
-            // edges which are connected to external nodes but not from the main node
-            subEdges: {}
-        };
+        // subEdges: edges which are connected to external nodes but not from the main node
+        let mainNodeData = { subEdges: {} };
         
-        // Collect & match external nodes (TODO is it a good assumption? if 1 endnode of an object is defined -> external edge)
-        for (let ek in o.edges) {
-            let e = o.edges[ek];
-            let subNodeAlias = 'ens_' + ensi;
-
-            // if edge.target is an external node
-            if (e.target !== undefined) {
-                if (!this.isNodeAliased(e.target, externalNodes)) {
-                    nodeAlias = 'en_' + (eni++);
-                    externalNodes[nodeAlias] = e.target;
-                    query += 'MATCH (' + nodeAlias + ') WHERE ' + nodeAlias + '.id="' + e.target + '" ';
-                }
-                
-                if (e.subEdge !== undefined) {
-                    e.target = subNodeAlias;
-                } else {
-                    e.target = nodeAlias;
-                }
-            } else 
-            // if edge.source is an external node
-            if (e.source !== undefined) {
-                if (!this.isNodeAliased(e.source, externalNodes)) {
-                    nodeAlias = 'en_' + (eni++);
-                    externalNodes[nodeAlias] = e.source;
-                    query += 'MATCH (' + nodeAlias + ') WHERE ' + nodeAlias + '.id="' + e.source + '" ';
-                }
-
-                if (e.subEdge !== undefined) {
-                    e.source = subNodeAlias;
-                } else {
-                    e.source = nodeAlias;
-                }
-
-                if (c.edges[ek].type === 'H') {
-                    mainNodeData.key = c.edges[ek].target;
-                    mainNodeData.alias = 'in_' + mainNodeData.key;
-                }
-            }
-
-            if (e.subEdge !== undefined) {
-                externalNodes[subNodeAlias] = connectedSubNodes[e.subEdge].id;
-                query += 'MATCH (' + subNodeAlias + ') WHERE ' + subNodeAlias + '.id="' + connectedSubNodes[e.subEdge].id + '" ';
-                ensi++;
-            }
-        }
-        
-        // Nodes which are freshly aliased
+        // Keys of the nodes which still have to be matched
         let nodes = {};
-        for (let nk in externalNodes) {
-            nodes[nk] = nk;
+        for (let nk in o.nodes) {
+            // status: 0 = node not touched; 1 = node aliased; 2 = node + all connected edges aliased
+            nodes[nk] = {
+                status: 0
+            };
         }
         
-        // clone o.edges
-        let edges = JSON.parse(JSON.stringify(o.edges));
-        utils.mergeObjects(edges, c.edges);
+        query += this.matchExternalNodes(o, c, mainNodeData, nodes, connectedSubNodes);
+        console.log('nodes (after matchExternalNodes): ', nodes);
+        // clone o.edges -> the edges which still have to be matched
+        let edgesToDo = JSON.parse(JSON.stringify(o.edges));
+        utils.mergeObjects(edgesToDo, c.edges);
         
         // console.log('o', utils.showJSON(o));
         // console.log('c', utils.showJSON(c));
         // console.log('edges', utils.showJSON(edges));
         
         // Create edges and endnodes for the already matched external nodes until all edges are created
-        while (Object.keys(edges).length > 0) {
-            let cefnResult = this.createEdgesForNodes(nodes, edges, o, c, mainNodeData, connectedSubNodes);
-            nodes = cefnResult.nodes;
-            for (let i=0; i<cefnResult.edges.length; i++) {
-                delete edges[cefnResult.edges[i]];
+        while (Object.keys(edgesToDo).length > 0) {
+            let nodeKey = this.getNodeByStatus(nodes, 1);
+            if (nodeKey === undefined) {
+                console.log('Error: no node found with aliased status');
+                return;
             }
-            query += cefnResult.query;
+            query += this.createEdgesForNode(nodeKey, edgesToDo, nodes, o, c, mainNodeData, connectedSubNodes);
         }
         
         // console.log('mainNodeData', utils.showJSON(mainNodeData));
@@ -119,144 +72,237 @@ let objectCreateQuery = {
         return query;
     },
     
-    createEdgesForNodes: function(nodes, edges, o, c, mainNodeData, connectedSubNodes) {
-        logger.log(this.className + '.createEdgesForNodes', {type: 'function'});
+    // Create all edges with their other endnodes
+    createEdgesForNode: function(nodeKey, edgesToDo, nodes, o, c, mainNodeData, connectedSubNodes) {
+        logger.log(this.className + '.createEdgesForNode', {type: 'function'});
         
         let query = '';
-        let newNodes = {};
         let newEdges = [];
-        console.log('Search edges for nodes: ', nodes);
-        for (let nk in nodes) {
-            const na = nodes[nk];
+console.log('nodeKey: ', nodeKey);
+console.log('nodes: ', nodes);
+        
+        for (let ek in edgesToDo) {
+            let e = edgesToDo[ek];
             
-            for (let ek in edges) {
-                let e = edges[ek];
+            // If edge is connectd to the node
+            if (e.target === nodeKey || e.source === nodeKey) {
                 
-                if (e.target === nk || e.source === nk) {
-        console.log('edge: ', ek);
-                    // new node key
-                    let nnk;
-                    // new node alias
-                    let nna;
-                    if (e.target === nk) {
-                        nnk = e.source;
-                    } else 
-                    if (e.source === nk) {
-                        nnk = e.target;
-                    }
-                    nna = 'in_' + nnk;
-console.log('connected new node: ', nnk);
+console.log('ek: ', ek);
+console.log('e: ', e);
+                // new node key
+                let endNodeKey;
+                // new node alias
+                let endNodeAlias;
+                if (e.target === nodeKey) {
+                    endNodeKey = e.source;
+                } else 
+                if (e.source === nodeKey) {
+                    endNodeKey = e.target;
+                }
+                endNodeAlias = 'in_' + endNodeKey;
+
+console.log('connected new node: ', endNodeKey);
 // TODO Insert id link for connected internal nodes to main node's fields. Hint: let main node creation for last and previously created node ids can be inserted.
-
-                    // If the connected new node is referenced in the edges of the class
-                    if (nnk !== undefined) {
+                    
+                if (endNodeKey !== undefined) {
+                    // If node was not created yet. It can be already created when there are multiple edges between two nodes
+                    if (nodes[endNodeKey].status === 0) {
+                        let objectFieldsString = '';
+                        nodes[endNodeKey].status = 1;
                         
-                        // If node was not created yet
-                        if (newNodes[nnk] === undefined) {
-                            let objectFieldsString = '';
-                            
-                            for (let fk in o.nodes[nnk].fields) {
-                                // TODO not necessary, just for show the node names in neo4j browser
-                                if (fk === 'name') {
-                                    objectFieldsString += fk + ':' + utils.formatField(o.nodes[nnk].fields[fk]) + ',';
-                                }
-                                objectFieldsString += 'nf_' + fk + ':' + utils.formatField(o.nodes[nnk].fields[fk]) + ',';
+                        for (let fk in o.nodes[endNodeKey].fields) {
+                            // TODO not necessary, just for show the node names in neo4j browser
+                            if (fk === 'name') {
+                                objectFieldsString += fk + ':' + utils.formatField(o.nodes[endNodeKey].fields[fk]) + ',';
                             }
-
-                            if (nnk === mainNodeData.key) {
-                                // store class reference in main node
-                                objectFieldsString += 'class:"' + c.id + '",';
-                                // edge type + edge direction
-                                let edgeMarks = {};
-                                
-                                // store available class info in main node
-                                for (let mek in c.edges) {
-                                    let me = c.edges[mek];
-                                    if (o.edges[mek] === undefined && (me.source === undefined || me.target === undefined)) {
-                                        let acNodeKey;
-                                        let direction;
-                                        let edgeMarkKey;
-                                        
-                                        if (me.source === undefined) {
-                                            edgeMarkKey = 'ie_' + me.type;
-                                            if (me.target !== nnk) {
-                                                acNodeKey = me.target;
-                                            }
-                                        } else
-                                        if (me.target === undefined) {
-                                            edgeMarkKey = 'oe_' + me.type;
-                                            if (me.source !== nnk) {
-                                                acNodeKey = me.source;
-                                            }
-                                        }
-                                        
-                                        if (me.multiple === true) {
-                                            edgeMarks[edgeMarkKey] = -1;
-                                        } else {
-                                            if (edgeMarks[edgeMarkKey] === undefined) {
-                                                edgeMarks[edgeMarkKey] = 1;
-                                            } else
-                                            if (edgeMarks[edgeMarkKey] > 0) {
-                                                edgeMarks[edgeMarkKey]++;
-                                            }
-                                        }
-                                        
-                                        if (acNodeKey !== undefined) {
-                                            const acNodeAlias = 'in_' + acNodeKey;
-                                            
-                                            // console.log('add acNodeKey', edgeMarkKey, acNodeKey);
-                                            if (mainNodeData.subEdges[edgeMarkKey] === undefined) {
-                                                mainNodeData.subEdges[edgeMarkKey] = {};
-                                            }
-                                            
-                                            mainNodeData.subEdges[edgeMarkKey][mek] = {
-                                                nodeAlias: acNodeAlias,
-                                                nodeName: c.nodes[acNodeKey].name
-                                            };
-                                        }
-                                    }
-                                }
-                                
-                                for (let ek in edgeMarks) {
-                                    objectFieldsString += ek + ':' + edgeMarks[ek] + ',';
-                                }
-                            }                       
-                            
-                            objectFieldsString = objectFieldsString.substring(0, objectFieldsString.length - 1);
-
-                            query += 'CREATE (' + nna + ':' + c.nodes[nnk].label;
-                            query += '{id:apoc.create.uuid(),' + objectFieldsString + '})';
-                            
-                            newNodes[nnk] = nna;
-                        } else {
-                            query += 'CREATE (' + nna + ')';
+                            objectFieldsString += 'nf_' + fk + ':' + utils.formatField(o.nodes[endNodeKey].fields[fk]) + ',';
                         }
+
+                        if (endNodeKey === mainNodeData.key) {
+                            objectFieldsString += this.createMainNodeData(endNodeKey, o, c, mainNodeData);
+                        }                       
                         
-                        if (e.target === nk) {
-                            query += '-[:' + e.type + '{id:apoc.create.uuid()}]->(' + na + ') ';
-                        } else 
-                        if (e.source === nk) {
-                            query += '<-[:' + e.type + '{id:apoc.create.uuid()}]-(' + na + ') ';
-                        }
+                        objectFieldsString = objectFieldsString.substring(0, objectFieldsString.length - 1);
+
+                        query += 'CREATE (' + endNodeAlias + ':' + c.nodes[endNodeKey].label;
+                        query += '{id:apoc.create.uuid(),' + objectFieldsString + '})';
+                        
+                        nodes[endNodeKey].alias = endNodeAlias;
+                    } else {
+                        query += 'CREATE (' + endNodeAlias + ')';
                     }
                     
-                    newEdges.push(ek);
+                    if (e.target === nodeKey) {
+                        query += '-[:' + e.type + '{id:apoc.create.uuid()}]->(' + nodes[nodeKey].alias + ') ';
+                    } else 
+                    if (e.source === nodeKey) {
+                        query += '<-[:' + e.type + '{id:apoc.create.uuid()}]-(' + nodes[nodeKey].alias + ') ';
+                    }
+                }
+                
+                newEdges.push(ek);
+            }
+        }
+        
+        for (let i=0; i<newEdges.length; i++) {
+            delete edgesToDo[newEdges[i]];
+        }
+        
+        nodes[nodeKey].status = 2;
+        
+        return query;
+        // return {
+            // query: query,
+            // nodes: newNodes,
+            // edges: newEdges
+        // }
+    },
+    
+    // Returns query part which matches external nodes
+    // Modifies:
+    //     o: edge source / target gets filled with external node alias
+    //     mainNodeData: key and alias gets filled
+    matchExternalNodes: function(o, c, mainNodeData, nodes, connectedSubNodes) {
+        let query = '';
+        let eni = 0; // external node index
+        let ensi = 0; // external node sub edge index
+
+        // Collect & match external nodes (TODO is it a good assumption? if 1 endnode of an object is defined -> external edge)
+        for (let ek in o.edges) {
+            let e = o.edges[ek];
+            let nodeAlias;
+            let subNodeAlias = 'ens_' + ensi;
+
+            // if edge.target is an external node (edge.target = id of external node)
+            if (e.target !== undefined) {
+                if (!this.isNodeAliased(e.target, nodes)) {
+                    nodeAlias = 'en_' + (eni++);
+                    nodes[nodeAlias] = {
+                        status: 1,
+                        alias: nodeAlias,
+                        id: e.target                    
+                    };
+                    query += 'MATCH (' + nodeAlias + ') WHERE ' + nodeAlias + '.id="' + e.target + '" ';
+                }
+                
+                if (e.subEdge !== undefined) {
+                    e.target = subNodeAlias;
+                } else {
+                    e.target = nodeAlias;
+                }
+            } else 
+            // if edge.source is an external node
+            if (e.source !== undefined) {
+                if (!this.isNodeAliased(e.source, nodes)) {
+                    nodeAlias = 'en_' + (eni++);
+                    nodes[nodeAlias] = {
+                        status: 1,
+                        alias: nodeAlias,
+                        id: e.source                    
+                    };
+                    query += 'MATCH (' + nodeAlias + ') WHERE ' + nodeAlias + '.id="' + e.source + '" ';
+                }
+
+                if (e.subEdge !== undefined) {
+                    e.source = subNodeAlias;
+                } else {
+                    e.source = nodeAlias;
+                }
+
+                if (c.edges[ek].type === 'H') {
+                    mainNodeData.key = c.edges[ek].target;
+                    mainNodeData.alias = 'in_' + mainNodeData.key;
+                }
+            }
+
+            if (e.subEdge !== undefined) {
+                nodes[subNodeAlias] = {
+                    status: 1,
+                    alias: subNodeAlias,
+                    id: connectedSubNodes[e.subEdge].id
+                };
+                query += 'MATCH (' + subNodeAlias + ') WHERE ' + subNodeAlias + '.id="' + connectedSubNodes[e.subEdge].id + '" ';
+                ensi++;
+            }
+        }
+
+        return query;
+    },
+    
+    // Store class date in object's main node
+    createMainNodeData: function(nnk, o, c, mainNodeData) {
+        // store class reference in main node
+        let q = 'class:"' + c.id + '",';
+
+        // edge type + edge direction
+        let edgeMarks = {};
+        
+        // store available class info in main node
+        for (let mek in c.edges) {
+            let me = c.edges[mek];
+            if (o.edges[mek] === undefined && (me.source === undefined || me.target === undefined)) {
+                let acNodeKey;
+                let direction;
+                let edgeMarkKey;
+                
+                if (me.source === undefined) {
+                    edgeMarkKey = 'ie_' + me.type;
+                    if (me.target !== nnk) {
+                        acNodeKey = me.target;
+                    }
+                } else
+                if (me.target === undefined) {
+                    edgeMarkKey = 'oe_' + me.type;
+                    if (me.source !== nnk) {
+                        acNodeKey = me.source;
+                    }
+                }
+                
+                if (me.multiple === true) {
+                    edgeMarks[edgeMarkKey] = -1;
+                } else {
+                    if (edgeMarks[edgeMarkKey] === undefined) {
+                        edgeMarks[edgeMarkKey] = 1;
+                    } else
+                    if (edgeMarks[edgeMarkKey] > 0) {
+                        edgeMarks[edgeMarkKey]++;
+                    }
+                }
+                
+                if (acNodeKey !== undefined) {
+                    const acNodeAlias = 'in_' + acNodeKey;
+                    
+                    // console.log('add acNodeKey', edgeMarkKey, acNodeKey);
+                    if (mainNodeData.subEdges[edgeMarkKey] === undefined) {
+                        mainNodeData.subEdges[edgeMarkKey] = {};
+                    }
+                    
+                    mainNodeData.subEdges[edgeMarkKey][mek] = {
+                        nodeAlias: acNodeAlias,
+                        nodeName: c.nodes[acNodeKey].name
+                    };
                 }
             }
         }
         
-        return {
-            query: query,
-            nodes: newNodes,
-            edges: newEdges
+        for (let ek in edgeMarks) {
+            q += ek + ':' + edgeMarks[ek] + ',';
         }
+        
+        return q;
     },
-     
+    
     isNodeAliased: function(id, nodes) {
         for (let nk in nodes) {
-            if (id === nodes[nk]) return true;
+            if (id === nodes[nk].id) return true;
         }
         return false;
+    },
+    
+    getNodeByStatus: function(nodes, status) {
+        for (let nk in nodes) {
+            if (status === nodes[nk].status) return nk;
+        }
     },
     
     checkAvailableEdges: function(nodes) {
