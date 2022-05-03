@@ -1,0 +1,64 @@
+Object structure
+----------------
+- An object consists of 
+    - nodes (at least one)
+        - one of the nodes is the main node
+    - edges (at least one)
+
+- A node
+    - has a label
+    - has a name
+    - has fields
+    - can be optional
+
+- An edge
+    - has a type
+    - has two endnodes:
+        - the source node
+        - the target node
+    - has at least one endnode which belongs to the object
+    - is internal, if its source and target node belongs to the object
+    - is external, if its source or its target does not belong to the object
+    - can be multiple if it is external
+    - can be optional
+
+- An object is an instance of a class
+
+- A main node
+    - has a class definition, which can be
+        - a reference to the class
+        - an edge to the class
+        - stored directly in the node
+    - has information about the object's available edges
+        - the number of available edges for each type and direction
+        - 
+
+-----------------------------------------------------------------------------------------------
+
+Object form
+-----------
+- The object form has separate sections for each nodes of the object (node forms)
+- Node fields are displayed
+
+- Internal edges are displayed
+
+
+Connecting objects
+------------------
+
+- Object form (of initial object)
+    - The form has separate sections for each nodes
+    - Node properties are displayed
+    - Internal edges are displayed
+        - An internal edge is displayed on its both endnodes' sections
+        - An optional edge can be deleted
+        - A deleted edge is still displayed, but marked as deleted
+    - External edges are displayed
+        - The connected external object's name is displayed
+        - All connectable objects are listed (except the selected) and one or more can be selected
+            - Connectable objects are objects which have available matching edges
+                - A matching edge has same type and opposite direction as the initial edge
+            - One can be selected if the edge is not multiple
+            - Multiple can be selected if the edge is multiple
+            - When an object is selected for one edge, it still may be selected for other edges if it still has available edges
+            
